@@ -1,53 +1,74 @@
 <!doctype html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101014">
-  <meta name="description" content="বাংলাদেশের স্কুলের বেঞ্চের কলম খেলার ব্রাউজার গেম — কলম খেলবি?">
-  <title>কলম খেলবি? — Pen Battle</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="description" content="Pen Game (কলম খেলবি?): the school-bench pen-flick game in your browser.">
+<title>Pen Game — কলম খেলবি?</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#home" aria-label="কলম খেলবি হোম"><span class="brand-mark">✎</span><span>কলম খেলবি<span class="brand-dot">?</span></span></a>
-      <span class="eyebrow">SCHOOL BENCH • PEN BATTLE</span>
-    </header>
+<main id="game" hidden>
+  <header id="hud">
+    <div id="chips"></div>
+    <p id="turn" role="status" aria-live="polite"></p>
+    <button id="bp" aria-label="Pause">❚❚</button><button id="br" aria-label="Restart match">↻</button>
+  </header>
+  <div class="wrap"><canvas id="cv" aria-label="Wooden bench with pens"></canvas><div id="toast" role="status"></div></div>
+</main>
 
-    <section id="home" class="hero">
-      <div class="hero-copy">
-        <p class="kicker"><span class="status-dot"></span> বেঞ্চের লড়াই শুরু হোক</p>
-        <h1>কলম খেলবি<span>?</span></h1>
-        <p class="subtitle">একটা বেঞ্চ। কয়েকটা কলম। শেষ পর্যন্ত টিকে থাকবে কে?</p>
-        <p class="description">কলমে ফ্লিক মারো, প্রতিপক্ষকে বেঞ্চ থেকে ফেলে দাও—কিন্তু সাবধান, তোমার কলমটাও যেন না পড়ে!</p>
-        <div class="actions"><button id="play-button" class="button button-primary">▶ খেলা শুরু করো</button><button id="how-button" class="button button-secondary">কীভাবে খেলবে?</button></div>
-        <div class="mini-stats"><div><strong>৪</strong><span>জন খেলোয়াড়</span></div><div><strong>১</strong><span>বেঞ্চ চ্যাম্পিয়ন</span></div><div><strong>∞</strong><span>রিম্যাচ</span></div></div>
-      </div>
-      <div class="hero-art" aria-label="কাঠের বেঞ্চে চারটি রঙিন কলমের চিত্র">
-        <div class="art-tag tag-top">ROUND <b>01</b></div>
-        <div class="desk-lines"></div>
-        <div class="doodle doodle-star">✳</div><div class="doodle doodle-heart">♡</div><div class="doodle doodle-note">কলম খেলবি?</div>
-        <div class="pen pen-blue"><i></i></div><div class="pen pen-black"><i></i></div><div class="pen pen-red"><i></i></div><div class="pen pen-green"><i></i></div>
-        <div class="art-tag tag-bottom"><span class="status-dot"></span> YOUR TURN</div>
-      </div>
-    </section>
+<section class="ov" id="menu">
+  <h1>Pen Game</h1>
+  <p class="bn">কলম খেলবি?</p>
+  <div class="col">
+    <button class="pri" id="quick">Quick match — খেলা শুরু করো</button>
+    <button id="custom">Custom match</button>
+    <button id="rules">How to play — কীভাবে খেলবে?</button>
+  </div>
+  <dl class="stats" id="stats"></dl>
+</section>
 
-    <section id="game-section" class="game-section hidden">
-      <div class="section-heading"><div><p class="kicker">LIVE MATCH</p><h2>বেঞ্চে নামো</h2></div><div class="round-pill">রাউন্ড <strong id="round-label">১</strong></div></div>
-      <div class="game-hud"><div class="player-chip you"><span class="player-dot"></span><span><b>তুমি</b><small id="you-state">তোমার চাল</small></span></div><div class="player-chip"><span class="player-dot blue"></span><span><b>নীল</b><small id="p2-state">খেলছে</small></span></div><div class="player-chip"><span class="player-dot green"></span><span><b>সবুজ</b><small id="p3-state">খেলছে</small></span></div><div class="player-chip"><span class="player-dot gold"></span><span><b>হলুদ</b><small id="p4-state">খেলছে</small></span></div></div>
-      <div class="canvas-wrap"><canvas id="game-canvas" aria-label="কলমের খেলার মাঠ"></canvas><div id="game-message" class="game-message hidden" role="status"><span class="message-emoji">🏆</span><h3 id="message-title">তুমি জিতেছ!</h3><p id="message-text">শেষ কলম হিসেবে টিকে গেছ।</p><button id="rematch-button" class="button button-primary">আবার খেলি ↻</button></div></div>
-      <div class="game-controls"><div class="instruction"><span class="instruction-icon">↙</span><span><b>টেনে ছাড়ো</b><small>কলমের কাছ থেকে পিছনে টেনে ছেড়ে দাও</small></span></div><div class="control-actions"><button id="restart-button" class="button button-secondary">↻ নতুন ম্যাচ</button><button id="home-button" class="button button-quiet">হোমে ফিরো</button></div></div>
-      <p class="mobile-hint">মোবাইলে: কলমের পাশে আঙুল রাখো, পিছনে টানো, তারপর ছেড়ে দাও।</p>
-    </section>
+<section class="ov" id="setup" hidden>
+  <form class="panel" onsubmit="return false">
+    <h2>Custom match</h2>
+    <div class="row"><label>Players</label><span class="step"><button type="button" id="nm" aria-label="Fewer players">−</button><output id="nv"></output><button type="button" id="np" aria-label="More players">+</button></span></div>
+    <div id="rows"></div>
+    <div class="row"><label for="df">AI level</label><select id="df"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
+    <div class="row"><label for="pw">Flick strength</label><select id="pw"><option value="soft">Soft</option><option value="normal">Normal</option><option value="strong">Strong</option></select></div>
+    <div class="row"><label for="as">Aim guide</label><input type="checkbox" id="as"></div>
+    <div class="row"><label for="sn">Sound</label><input type="checkbox" id="sn"><input type="range" id="vo" min="0" max="1" step=".05" aria-label="Volume"></div>
+    <div class="row"><button type="button" id="back">Back</button><button type="button" class="pri" id="go">Start match</button></div>
+  </form>
+</section>
 
-    <section id="how-section" class="how-section">
-      <div class="section-heading"><div><p class="kicker">সহজ নিয়ম, জমজমাট লড়াই</p><h2>খেলবে যেভাবে</h2></div><span class="section-number">01 — 03</span></div>
-      <div class="rule-grid"><article class="rule-card"><span class="rule-number">01</span><div class="rule-icon">✎</div><h3>কলম বেছে নাও</h3><p>তোমার কলমের কাছে টাচ বা ক্লিক করো। প্রতিপক্ষের কলমগুলোর অবস্থান দেখে নাও।</p></article><article class="rule-card"><span class="rule-number">02</span><div class="rule-icon">↗</div><h3>ফ্লিক মেরে আঘাত করো</h3><p>কলম থেকে পিছনের দিকে টেনে ছেড়ে দাও। যত দূর টানবে, ধাক্কা তত জোরে হবে।</p></article><article class="rule-card"><span class="rule-number">03</span><div class="rule-icon">♛</div><h3>শেষ পর্যন্ত টিকে থাকো</h3><p>যে কলম বেঞ্চের বাইরে চলে যায়, সে আউট। শেষ কলমটাই জয়ী!</p></article></div>
-    </section>
+<section class="ov" id="how" hidden>
+  <div class="panel">
+    <h2>How to play</h2>
+    <ol>
+      <li>Every player gets one pen.</li>
+      <li>Players take turns. Only the active pen can be flicked.</li>
+      <li>Press your pen and drag backwards, like a slingshot.</li>
+      <li>Release to flick. A longer drag is a harder flick.</li>
+      <li>Knock opponents' pens off the bench.</li>
+      <li>Keep your own pen on the bench.</li>
+      <li>The last pen on the bench wins.</li>
+    </ol>
+    <p class="note">Optional house rules (Custom match): AI level, flick strength, aim guide. A pen is out when its centre crosses the bench edge; touching the edge is safe.</p>
+    <button class="pri" id="hb">Got it</button>
+  </div>
+</section>
 
-    <footer class="footer"><a class="brand footer-brand" href="#home"><span class="brand-mark">✎</span><span>কলম খেলবি<span class="brand-dot">?</span></span></a><span>স্কুলের বেঞ্চের স্মৃতি থেকে তৈরি, বাংলাদেশের জন্য।</span><a href="https://github.com/iammdtanvirrahman/pen-game" target="_blank" rel="noreferrer">GitHub repository ↗</a></footer>
-  </main>
-  <script src="game.js"></script>
+<section class="ov" id="pause" hidden>
+  <div class="panel"><h2>Paused</h2><div class="row"><button id="pm">Menu</button><button class="pri" id="pr">Resume</button></div></div>
+</section>
+
+<section class="ov" id="end" hidden>
+  <div class="panel"><h2 id="et"></h2><ol id="es"></ol><div class="row"><button id="em">Menu</button><button class="pri" id="er">Rematch — আবার খেলি</button></div></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script src="rules.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
