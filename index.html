@@ -362,7 +362,7 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
 
 /* ---------- input ---------- */
 const cv=$('#c'),cx=cv.getContext('2d');let sc=1,scx=1,scy=1;
-function rs(){const r=$('#stage').getBoundingClientRect(),land=matchMedia('(max-width:900px) and (orientation:landscape)').matches,d=Math.min(devicePixelRatio||1,2),sx=land?r.width/W:Math.min(r.width/W,r.height/H),sy=land?r.height/H:sx;cv.style.width=Math.max(1,W*sx)+'px';cv.style.height=Math.max(1,H*sy)+'px';cv.width=Math.round(W*sx*d);cv.height=Math.round(H*sy*d);sc=sx*d;scx=cv.width/W;scy=cv.height/H}
+function rs(){const r=$('#stage').getBoundingClientRect(),immersive=document.body.classList.contains('immersive'),land=immersive||matchMedia('(max-width:900px) and (orientation:landscape)').matches,d=Math.min(devicePixelRatio||1,2),sx=land?r.width/W:Math.min(r.width/W,r.height/H),sy=land?r.height/H:sx;cv.style.width=Math.max(1,W*sx)+'px';cv.style.height=Math.max(1,H*sy)+'px';cv.width=Math.round(W*sx*d);cv.height=Math.round(H*sy*d);sc=sx*d;scx=cv.width/W;scy=cv.height/H}
 const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
 const cpOf=(b,t)=>({x:b.position.x+Math.cos(b.angle)*t,y:b.position.y+Math.sin(b.angle)*t});
 cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
