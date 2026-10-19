@@ -293,7 +293,7 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(50,t-last||16);la
  if(G&&!paused&&G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);acc-=h;c++}if(c>=24)acc=0;simCheck(dt)}
  draw(t,dt)}
 /* ---------- UI ---------- */
-const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false;
+const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false,penDirectoryPromise=Promise.resolve(0),penDirectoryReady=false;
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
 function show(h){scr.innerHTML=`<div class="p" role="dialog" aria-modal="true">${h}</div>`;scr.style.display='flex';const f=scr.querySelector('button,select,input');f&&f.focus()}
 function hide(){scr.style.display='none'}
@@ -323,8 +323,8 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value=${k} ${k==v?'select
  <label>Aim assist line <input type=checkbox data-s=asst ${S.asst?'checked':''}></label><label>Accuracy variation <input type=checkbox data-s=acc ${S.acc?'checked':''}></label>
  <p class=mu>Strength and surface apply from the next match.</p><div class=g><button class=pr data-a=menu>Done</button></div>`)}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const f={
- setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI()},target:()=>{setupTarget=+a.dataset.v;setupUI()},choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+a.dataset.v;setupUI()},
- quick:()=>{start([0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i})));hide()},
+ setup:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>setup(0))},prac:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>setup(1))},rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI()},target:()=>{setupTarget=+a.dataset.v;setupUI()},choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+a.dataset.v;setupUI()},
+ quick:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>{start([0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i})));hide()})},
  go:()=>{start(cfg.pl.slice(0,cfg.n).map(p=>({...p,name:p.name.trim()||'Player'})));hide()},
  rst:()=>{if(G){start(G.cfg);hide()}}}[a.dataset.a];f&&f()});
 document.addEventListener('input',e=>{const el=e.target,d=el.dataset;
@@ -389,13 +389,31 @@ const Assets={bench:{img:null,proc:null},cache:new Map(),
  addPen(d){d.n=d.n||'Custom pen';d.c=d.c||'#888';if(d.src)this.load(d.src).then(i=>{d.img=i;this.cache.clear()}).catch(()=>toast('Pen image failed to load'));PENS.push(d);return PENS.length-1},
  async setBench(src){if(!src){this.bench.img=null;return}try{this.bench.img=await this.load(src)}catch(e){toast('Bench image failed to load')}},
  async loadManifest(m){if(m.bench&&m.bench.src)await this.setBench(m.bench.src);for(const p of m.pens||[])this.addPen({...p})},
- reset(){this.bench.img=null;for(let i=PENS.length-1;i>5;i--)PENS.splice(i,1);this.cache.clear()}};
+ async loadPenDirectory(){
+  const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/pens';
+  const existing=new Set(PENS.map(p=>p.src).filter(Boolean));let page=1,added=0;
+  while(page<=10){
+   const res=await fetch(api+'?ref=main&per_page=100&page='+page,{headers:{Accept:'application/vnd.github+json'}});
+   if(!res.ok)throw new Error('Pen asset directory could not be listed ('+res.status+')');
+   const files=await res.json();if(!Array.isArray(files))break;
+   files.filter(f=>f.type==='file'&&/\.(png|webp|jpe?g|gif|avif)$/i.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).forEach(f=>{
+    const src=f.download_url||'https://raw.githubusercontent.com/iammdtanvirrahman/pen-game/main/'+f.path.split('/').map(encodeURIComponent).join('/');
+    if(!src||existing.has(src))return;
+    const n=f.name.replace(/\.(png|webp|jpe?g|gif|avif)$/i,'').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).slice(0,28)||'Custom pen';
+    this.addPen({n,src,len:84,band:-10,origin:'repo'});existing.add(src);added++;
+   });
+   if(files.length<100)break;page++;
+  }
+  return added;
+ },
+ reset(){this.bench.img=null;for(let i=PENS.length-1;i>5;i--)if(PENS[i].origin==='local'||PENS[i].origin==='custom')PENS.splice(i,1);this.cache.clear()}};
 PENS.splice(0,PENS.length,
  {n:'Blue ballpoint',k:'click',c:'#1e40af',g:'#14171d',ink:'#1e40af'},{n:'Black ballpoint',k:'click',c:'#2b2d33',g:'#0b0b0d',ink:'#111'},{n:'Red ballpoint',k:'click',c:'#c62828',g:'#17171a',ink:'#dc2626'},
  {n:'Clear hex pen',k:'stick',c:'rgba(205,228,255,.34)',cap:'#2563eb',ink:'#2563eb'},{n:'Neon green',k:'click',c:'#6fbf0a',g:'#2a313c',ink:'#65a30d'},{n:'Orange student',k:'stick',c:'rgba(255,214,170,.36)',cap:'#f97316',ink:'#ea580c'});
 window.PenGame={Assets,PENS,PC,start,Q};
 // Restore custom pen skins uploaded in Settings on this browser.
-try{const savedPens=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(savedPens))savedPens.forEach(p=>{if(p&&p.src)Assets.addPen(p)})}catch(e){}
+try{const savedPens=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(savedPens))savedPens.forEach(p=>{if(p&&p.src)Assets.addPen({...p,origin:'local'})})}catch(e){}
+penDirectoryPromise=Assets.loadPenDirectory().then(n=>{penDirectoryReady=true;return n}).catch(e=>{console.warn('Could not auto-load assets/pens:',e);penDirectoryReady=true;return 0});
 {const m=new URLSearchParams(location.search).get('assets');if(m)fetch(m).then(r=>r.json()).then(j=>Assets.loadManifest(j)).catch(()=>toast('Could not load asset manifest'))}
 /* ---- procedural pen sprite (drawn once per pen+player at 4x, then blitted) ---- */
 function drawPen(g,d,pc){
@@ -480,7 +498,7 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value=${k} ${k==v?'select
  <h3>Custom assets (this session)</h3><label>Bench image <input type=file accept="image/*" data-f=bench></label><label>Add pen skin <input type=file accept="image/*" data-f=pen></label>
  <p class=mu>Pen skins: transparent PNG with the pen pointing right. Strength and surface apply from the next match.</p><div class=g2><button data-a=ares>Reset assets</button><button class=pr data-a=menu>Done</button></div>`)}
 document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.dataset.f;if(!f||!el.files||!el.files[0])return;const file=el.files[0],fr=new FileReader();
- fr.onload=async()=>{if(f==='bench'){await Assets.setBench(fr.result);toast('Bench image applied')}else{const penData={n:file.name.replace(/\.\w+$/,'').slice(0,18)||'Custom pen',src:fr.result,len:84,band:-10};Assets.addPen(penData);try{const customPens=PENS.slice(6).map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}));localStorage.setItem('pg.customPens',JSON.stringify(customPens))}catch(err){toast('Pen added for this session, but browser storage is full')}toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
+ fr.onload=async()=>{if(f==='bench'){await Assets.setBench(fr.result);toast('Bench image applied')}else{const penData={n:file.name.replace(/\.\w+$/,'').slice(0,18)||'Custom pen',src:fr.result,len:84,band:-10,origin:'local'};Assets.addPen(penData);try{const customPens=PENS.filter(p=>p.origin==='local').map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}));localStorage.setItem('pg.customPens',JSON.stringify(customPens))}catch(err){toast('Pen added for this session, but browser storage is full')}toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
 document.addEventListener('click',e=>{if(e.target.closest('[data-a=ares]')){Assets.reset();try{localStorage.removeItem('pg.customPens')}catch(err){}toast('Custom assets reset')}});
 rs();requestAnimationFrame(loop);menu();
 })();
