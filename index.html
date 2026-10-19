@@ -8,15 +8,15 @@
 --ff:"Hind Siliguri",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--fd:"Permanent Marker","Hind Siliguri",system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-html:fullscreen,body:fullscreen{width:100%;height:100%;overflow:hidden}
-body:fullscreen{padding:0!important;gap:0!important}
-body:fullscreen #top{flex-shrink:0;margin:0;border-radius:0}
-body:fullscreen #stage{width:100vw;height:calc(100dvh - var(--hud-height, 48px));flex:1;min-height:0;padding:0;margin:0}
-body:fullscreen #c{max-width:none!important;max-height:none!important;border-radius:0!important}
+html:fullscreen,html:fullscreen body{width:100%;height:100%;overflow:hidden}
+html:fullscreen body{padding:0!important;gap:0!important}
+html:fullscreen body #top{flex-shrink:0;margin:0;border-radius:0}
+html:fullscreen body #stage{width:100vw;height:calc(100dvh - var(--hud-height, 48px));flex:1;min-height:0;padding:0;margin:0}
+html:fullscreen body #c{max-width:none!important;max-height:none!important;border-radius:0!important}
 @media (max-width:900px) and (orientation:landscape){
- body:fullscreen #top{padding:3px 6px;min-height:34px}
- body:fullscreen #stage{height:calc(100dvh - 40px);width:100vw}
- body:fullscreen #c{width:100%!important;height:100%!important}
+ html:fullscreen body #top{padding:3px 6px;min-height:34px}
+ html:fullscreen body #stage{height:calc(100dvh - 40px);width:100vw}
+ html:fullscreen body #c{width:100%!important;height:100%!important}
 }
 @media (max-width:900px) and (orientation:landscape){
  body{height:100dvh;min-height:0;padding:4px max(6px,env(safe-area-inset-left,0px)) 4px max(6px,env(safe-area-inset-right,0px));gap:4px;overflow:hidden}
