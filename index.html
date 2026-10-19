@@ -414,11 +414,11 @@ function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.he
  let pwv=0;
  if(drag&&G.st==='aim'){const b=cpOf(cur.body,drag.t),vx=b.x-drag.x,vy=b.y-drag.y,l=Math.hypot(vx,vy);cx.fillStyle='#fff';cx.beginPath();cx.arc(b.x,b.y,4,0,6.3);cx.fill();
   if(l>=18){const pw=Math.min(l,MAXD)/MAXD,a=Math.atan2(vy,vx),len=40+pw*140,col=`hsl(${120-120*pw},85%,55%)`;pwv=pw;
-   cx.strokeStyle='rgba(245,245,247,.5)';cx.setLineDash([6,6]);cx.lineWidth=2;cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(drag.x,drag.y);cx.stroke();cx.setLineDash([]);
-   if(S.asst)aimAssist(cur,a,pw);
+   
+   /* trajectory preview intentionally disabled: keep only the launch arrow */
    cx.strokeStyle=col;cx.fillStyle=col;cx.lineWidth=5;cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(b.x+Math.cos(a)*len,b.y+Math.sin(a)*len);cx.stroke();
    const ex=b.x+Math.cos(a)*len,ey=b.y+Math.sin(a)*len;cx.beginPath();cx.moveTo(ex+Math.cos(a)*14,ey+Math.sin(a)*14);cx.lineTo(ex+Math.cos(a+2.5)*12,ey+Math.sin(a+2.5)*12);cx.lineTo(ex+Math.cos(a-2.5)*12,ey+Math.sin(a-2.5)*12);cx.fill();
-   cx.font='bold 16px "Hind Siliguri",system-ui,sans-serif';cx.textAlign='left';cx.fillStyle='#fff';cx.fillText(Math.round(pw*100)+'%',drag.x+14,drag.y-10)}}
+   }}
  $('#pwf').style.width=pwv*100+'%';
  for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.x+=q.vx*dt/16;q.y+=q.vy*dt/16;if(q.g)q.vy+=.25*dt/16;q.l-=dt/(q.g?1500:400);if(q.l<=0){parts.splice(i,1);continue}
   cx.globalAlpha=Math.min(1,q.l*2);cx.fillStyle=q.c;if(q.g)cx.fillRect(q.x,q.y,7,4);else{cx.beginPath();cx.arc(q.x,q.y,2.5*q.l+1,0,6.3);cx.fill()}}cx.globalAlpha=1}
