@@ -344,8 +344,8 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
  flick(ang,pw)}
 
 /* ---------- input ---------- */
-const cv=$('#c'),cx=cv.getContext('2d');let sc=1;
-function rs(){const r=$('#stage').getBoundingClientRect(),s=Math.min(r.width/W,r.height/H)||1,d=Math.min(devicePixelRatio||1,2);cv.style.width=W*s+'px';cv.style.height=H*s+'px';cv.width=Math.round(W*s*d);cv.height=Math.round(H*s*d);sc=s*d}
+const cv=$('#c'),cx=cv.getContext('2d');let sc=1,scx=1,scy=1;
+function rs(){const r=$('#stage').getBoundingClientRect(),land=matchMedia('(max-width:900px) and (orientation:landscape)').matches,d=Math.min(devicePixelRatio||1,2),sx=land?r.width/W:Math.min(r.width/W,r.height/H),sy=land?r.height/H:sx;cv.style.width=Math.max(1,W*sx)+'px';cv.style.height=Math.max(1,H*sy)+'px';cv.width=Math.round(W*sx*d);cv.height=Math.round(H*sy*d);sc=sx*d;scx=cv.width/W;scy=cv.height/H}
 const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
 const cpOf=(b,t)=>({x:b.position.x+Math.cos(b.angle)*t,y:b.position.y+Math.sin(b.angle)*t});
 cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
@@ -423,7 +423,7 @@ function aimAssist(p,a,pw){const sp=3+(VMAX*S.pw-3)*Math.pow(pw,1.3),sw=sweep(p,
  cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,.65)';cx.strokeText(lbl,tx,ty);cx.fillStyle=col;cx.fillText(lbl,tx,ty);cx.restore()}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);{const benchImg=Assets.bench.img||Assets.bench.proc||fallback;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;if(Assets.bench.img){const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}else cx.drawImage(benchImg,0,0,W,H)}}if(!G)return;
+ cx.setTransform(scx,0,0,scy,sx*scx,sy*scy);{const benchImg=Assets.bench.img||Assets.bench.proc||fallback;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;if(Assets.bench.img){const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}else cx.drawImage(benchImg,0,0,W,H)}}if(!G)return;
  if(S.ink){cx.globalCompositeOperation='multiply';cx.drawImage(ink,0,0,W,H);cx.globalCompositeOperation='source-over'}
  const now=performance.now(),cur=G.pl[G.t];
  for(const o of G.obs){cx.save();cx.translate(o.x,o.y);cx.rotate(o.a);cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=8*sc;cx.shadowOffsetX=3*sc;cx.shadowOffsetY=5*sc;cx.drawImage(o.sp.c,-o.sp.w/2,-o.sp.h/2,o.sp.w,o.sp.h);cx.restore()}
