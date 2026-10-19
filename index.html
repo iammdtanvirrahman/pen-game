@@ -68,6 +68,60 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 .rk{display:flex;align-items:center;gap:10px;background:#17171b;border-radius:10px;padding:9px 12px;margin:6px 0}.rk b{margin-left:auto}
 #toast{background:rgba(17,17,20,.92);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.5);font-weight:600}
 @media(max-width:560px){#order em,#turn small{display:none}.p{padding:16px}}
+
+/* Pen picker / AI match setup refresh */
+.p:has(.setup-screen){max-width:920px;padding:0;overflow:auto;background:#0d0d10;border-color:#303036}
+.setup-screen{--hot:#e34355;padding:clamp(16px,3vw,30px);background:radial-gradient(ellipse at 90% 0,rgba(220,53,69,.14),transparent 38%),#101013}
+.setup-hero{padding:5px 0 22px;border-bottom:1px solid #2a2a30}
+.setup-kicker{font-size:10px;letter-spacing:.18em;font-weight:800;color:#f16c7b}
+.setup-hero h2{font-size:clamp(28px,5vw,42px);letter-spacing:-.045em;margin:8px 0 2px}
+.setup-hero h2 span{color:var(--hot)}
+.setup-hero p,.section-head p,.editor-title p{color:var(--mu);font-size:13px;margin:4px 0 0}
+.mode-pill{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:7px 11px;border:1px solid #3e272d;background:#211418;border-radius:99px;color:#ff9ba6;font-size:10px;font-weight:800;letter-spacing:.08em}
+.mode-pill i{width:5px;height:5px;background:#ff6577;box-shadow:0 0 9px #ff6577}
+.setup-section{padding:20px 0;border-bottom:1px solid #2a2a30}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+.section-head h3,.editor-title h3{font-size:17px;letter-spacing:-.02em;margin:0}
+.player-count{display:flex;gap:10px;align-items:center}
+.player-count>span,.gallery-head>span{font-size:10px;letter-spacing:.13em;color:var(--mu);font-weight:800}
+.player-count .seg{gap:4px}.player-count .seg button{min-width:30px;padding:6px 0;font-size:12px}
+.roster-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.roster-card{display:flex;flex-direction:column;text-align:left;gap:6px;padding:12px;background:linear-gradient(155deg,#1a1a20,#141418);border:1px solid #303038;border-radius:14px;min-width:0;transition:border-color .15s,transform .15s}
+.roster-card.active{border-color:var(--player-color);box-shadow:0 0 0 1px color-mix(in srgb,var(--player-color) 35%,transparent),inset 0 0 25px color-mix(in srgb,var(--player-color) 9%,transparent)}
+.roster-head{display:flex;align-items:center;gap:6px;width:100%}
+.roster-dot{width:7px;height:7px;border-radius:50%;background:var(--player-color);box-shadow:0 0 10px var(--player-color)}
+.role-label{font-size:9px;font-weight:850;letter-spacing:.08em;color:#d5d5dc}
+.roster-num{margin-left:auto;color:#74747e;font-size:10px}
+.roster-preview{height:54px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse,#292930,#18181d 70%);border-radius:9px;margin:4px 0}
+.roster-preview img{max-width:90%;max-height:48px;object-fit:contain}
+.roster-preview .pen-shape{width:80%;height:9px}
+.roster-card>strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roster-pen-name{font-size:11px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roster-edit{margin-top:4px;font-size:9px;letter-spacing:.1em;color:var(--player-color);font-weight:900}
+.pen-editor{padding:20px 0 14px}
+.editor-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.editor-title h3{margin-top:4px;font-size:21px}.editor-badge{font-size:9px;font-weight:900;letter-spacing:.12em;color:var(--player-color);border:1px solid var(--player-color);padding:6px 8px;border-radius:6px}
+.player-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:19px}
+.player-fields label{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:0;color:#bdbdc7;font-size:11px;font-weight:700}
+.player-fields input,.player-fields select{width:100%;min-width:0;background:#19191f;padding:10px 12px;font-size:13px}
+.gallery-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.gallery-head h4{font-size:13px;margin:0}
+.pen-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.pen-option{min-width:0;text-align:left;display:flex;flex-direction:column;gap:7px;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px}
+.pen-option.selected{border-color:var(--player-color);background:linear-gradient(150deg,color-mix(in srgb,var(--player-color) 13%,#17171c),#17171c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--player-color) 30%,transparent)}
+.pen-art{height:55px;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;background:radial-gradient(ellipse,#292930,#1a1a1f 75%)}
+.pen-art img{width:95%;height:95%;object-fit:contain;filter:drop-shadow(0 3px 3px #0008)}
+.pen-shape{display:block;position:relative;width:85%;height:9px;border-radius:99px;background:linear-gradient(180deg,#ffffffa3 0%,var(--pen-color) 27%,var(--pen-color) 72%,#111 100%);box-shadow:0 3px 5px #000a}
+.pen-shape:before{content:"";position:absolute;left:-8px;top:1px;width:10px;height:7px;clip-path:polygon(100% 0,100% 100%,0 50%);background:linear-gradient(90deg,#bec3cc,#fff)}
+.pen-shape:after{content:"";position:absolute;right:0;top:-1px;width:16px;height:11px;border-radius:0 6px 6px 0;background:linear-gradient(180deg,#9aa0a8,var(--pen-color),#08080a)}
+.pen-option-name{font-size:11px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pen-option-status{font-size:9px;font-weight:900;letter-spacing:.08em;color:#92929e}
+.pen-option.selected .pen-option-status{color:var(--player-color)}
+.setup-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;border-top:1px solid #2a2a30}
+.setup-footer>span{font-size:11px;color:var(--mu)}
+.setup-footer .g2{display:flex;gap:8px}
+.setup-footer button{padding:10px 15px}
+@media(max-width:620px){.p:has(.setup-screen){max-width:100%;width:100%;max-height:100%;border-radius:14px}.section-head{align-items:flex-start;flex-direction:column}.player-count{width:100%;justify-content:space-between}.roster-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.roster-card:last-child:nth-child(odd){grid-column:1/-1}.pen-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.player-fields{grid-template-columns:1fr}.setup-footer{align-items:stretch;flex-direction:column}.setup-footer .g2{width:100%}.setup-footer button{flex:1}}
 </style></head><body>
 <div id="top"><div id="turn"></div><div id="order"></div><div id="pwr" title="Flick power"><div id="pwf"></div></div>
 <button data-a="pause" aria-label="Pause">⏸</button><button data-a="rst" aria-label="Restart">↻</button><button data-a="menu" aria-label="Main menu">☰</button></div>
@@ -239,7 +293,7 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(50,t-last||16);la
  if(G&&!paused&&G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);acc-=h;c++}if(c>=24)acc=0;simCheck(dt)}
  draw(t,dt)}
 /* ---------- UI ---------- */
-const scr=$('#scr');let cfg=null,tt=0;
+const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false;
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
 function show(h){scr.innerHTML=`<div class="p" role="dialog" aria-modal="true">${h}</div>`;scr.style.display='flex';const f=scr.querySelector('button,select,input');f&&f.focus()}
 function hide(){scr.style.display='none'}
@@ -252,7 +306,7 @@ function menu(){clearTimeout(tmr);G=null;paused=false;drag=null;parts=[];hud();
  <h3>Player 1 stats</h3><div class=st><div><b>${ST.p}</b><span>Played</span></div><div><b>${ST.w}</b><span>Won</span></div><div><b>${ST.e}</b><span>Knock-outs</span></div>
  <div><b>${ST.p?(ST.rs/ST.p).toFixed(1):'–'}</b><span>Avg rank</span></div><div><b>${fav&&PENS[fav[0]]?esc(PENS[fav[0]].n.split(' ')[0]):'–'}</b><span>Fav pen</span></div><div><b>${ST.bs}</b><span>Best streak</span></div></div>
  <h3>Recent</h3><div class=mu>${ST.rec.length?ST.rec.map(esc).join('<br>'):'No matches yet.'}</div>`)}
-function setup(prac){cfg={n:prac?3:2,pl:[0,1,2,3,4,5].map(i=>({name:'Player '+(i+1),ai:prac&&i>0?2:0,pen:i}))};setupUI()}
+function setup(prac){setupPractice=!!prac;setupTarget=0;cfg={n:prac?3:2,pl:[0,1,2,3,4,5].map(i=>({name:prac?(i===0?'You':'AI Rival '+i):'Player '+(i+1),ai:prac&&i>0?2:0,pen:i%PENS.length}))};setupUI()}
 function setupUI(){const o=(a,v)=>a.map((x,i)=>`<option value=${i} ${i==v?'selected':''}>${x}</option>`).join('');
  show(`<h2>Match setup</h2><label>Players <select data-k=n aria-label="Number of players">${[2,3,4,5,6].map(n=>`<option ${n==cfg.n?'selected':''}>${n}</option>`).join('')}</select></label>
  ${cfg.pl.slice(0,cfg.n).map((p,i)=>`<div class=row><i style="background:${PC[i]}"></i><input type=text data-k=name data-i=${i} value="${esc(p.name)}" maxlength=14 aria-label="Player ${i+1} name">
@@ -269,7 +323,7 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value=${k} ${k==v?'select
  <label>Aim assist line <input type=checkbox data-s=asst ${S.asst?'checked':''}></label><label>Accuracy variation <input type=checkbox data-s=acc ${S.acc?'checked':''}></label>
  <p class=mu>Strength and surface apply from the next match.</p><div class=g><button class=pr data-a=menu>Done</button></div>`)}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const f={
- setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupUI()},
+ setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI()},target:()=>{setupTarget=+a.dataset.v;setupUI()},choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+a.dataset.v;setupUI()},
  quick:()=>{start([0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i})));hide()},
  go:()=>{start(cfg.pl.slice(0,cfg.n).map(p=>({...p,name:p.name.trim()||'Player'})));hide()},
  rst:()=>{if(G){start(G.cfg);hide()}}}[a.dataset.a];f&&f()});
@@ -289,13 +343,26 @@ function menu(){clearTimeout(tmr);G=null;paused=false;drag=null;parts=[];hud();
  <div class=g><button class=pr data-a=setup>▶ Play · local 2–6 players</button><div class=g2><button data-a=quick>⚡ Quick match</button><button data-a=prac>🤖 Practice vs AI</button><button data-a=rules>📖 Rules</button><button data-a=set>⚙ Settings</button></div></div>
  <h3>Player 1 stats</h3><div class=st>${cell('🎮',ST.p,'Played')}${cell('🏆',ST.w,'Won')}${cell('💥',ST.e,'Knock-outs')}${cell('📊',ST.p?(ST.rs/ST.p).toFixed(1):'–','Avg rank')}${cell('🖊️',fav&&PENS[fav[0]]?esc(PENS[fav[0]].n.split(' ')[0]):'–','Fav pen')}${cell('🔥',ST.bs,'Best streak')}</div>
  <h3>Recent</h3><div class=mu>${ST.rec.length?ST.rec.map(esc).join('<br>'):'No matches yet.'}</div>`)}
-function setupUI(){const o=(a,v)=>a.map((x,i)=>`<option value=${i} ${i==v?'selected':''}>${x}</option>`).join('');
- show(`<h2>Match setup</h2><h3>Players</h3><div class=seg role=group aria-label="Number of players">${[2,3,4,5,6].map(n=>`<button data-a=n data-v=${n} class="${n==cfg.n?'on':''}" aria-pressed=${n==cfg.n}>${n}</button>`).join('')}</div>
- ${cfg.pl.slice(0,cfg.n).map((p,i)=>`<div class=pc style="--c:${PC[i]}"><span class=pp style="background:${penBg(p.pen)}"></span><input type=text data-k=name data-i=${i} value="${esc(p.name)}" maxlength=14 aria-label="Player ${i+1} name">
- <select data-k=ai data-i=${i} aria-label="Player ${i+1} type">${o(['Human','AI Easy','AI Medium','AI Hard'],p.ai)}</select>
- <select data-k=pen data-i=${i} aria-label="Player ${i+1} pen">${o(PENS.map(x=>x.n),p.pen)}</select></div>`).join('')}
- <div class=g><button class=pr data-a=go>Start match</button><button data-a=menu>Back</button></div>`)}
-function rules(){show(`<h2>How to play</h2><h3>Core rules</h3><ol class=steps><li>Every player gets one pen on the bench.</li><li>Players take turns.</li><li>Grab your pen anywhere along its length and drag backward to aim. Where you hit it decides how it spins.</li><li>Release to flick.</li><li>Hit opponents’ pens toward the edge.</li><li>Keep your own pen on the bench.</li><li>The last pen on the bench wins.</li></ol>
+function setupUI(){
+ const target=cfg.pl[setupTarget]||cfg.pl[0], options=(arr,v)=>arr.map((x,i)=>`<option value=${i} ${i==v?'selected':''}>${x}</option>`).join('');
+ const penVisual=(idx,mini=false)=>{const d=PENS[idx]||PENS[0];return d.src?`<img src="${esc(d.src)}" alt="${esc(d.n)}">`:`<span class="pen-shape" style="--pen-color:${esc(d.c||'#777')}"></span>`};
+ show(`<div class="setup-screen">
+  <div class="setup-hero"><div class="setup-kicker">PEN GAME / MATCH LAB</div><h2>Build your lineup<span>.</span></h2><p>Choose a pen for yourself and every AI opponent before the match starts.</p><div class="mode-pill">${setupPractice?'🤖 PRACTICE VS AI':'👥 LOCAL MATCH'} <i></i> ${setupPractice?'You vs computer':'Player setup'}</div></div>
+  <div class="setup-section"><div class="section-head"><div><h3>01 / Your lineup</h3><p>Tap a player to customize their pen.</p></div><div class="player-count"><span>PLAYERS</span><div class="seg">${[2,3,4,5,6].map(n=>`<button data-a=n data-v=${n} class="${n==cfg.n?'on':''}" aria-pressed="${n==cfg.n}">${n}</button>`).join('')}</div></div></div>
+   <div class="roster-grid">${cfg.pl.slice(0,cfg.n).map((p,i)=>`<button type="button" class="roster-card ${setupTarget===i?'active':''}" data-a=target data-v=${i} style="--player-color:${PC[i]}">
+    <div class="roster-head"><span class="roster-dot"></span><span class="role-label">${p.ai?'AI OPPONENT':'YOU / PLAYER'}</span><span class="roster-num">0${i+1}</span></div>
+    <div class="roster-preview">${penVisual(p.pen,true)}</div><strong>${esc(p.name||'Player')}</strong><span class="roster-pen-name">${esc((PENS[p.pen]||PENS[0]).n)}</span><span class="roster-edit">${setupTarget===i?'EDITING PEN':'EDIT PEN ↗'}</span>
+   </button>`).join('')}</div>
+  </div>
+  <div class="pen-editor">
+   <div class="editor-title"><div><div class="setup-kicker">02 / CUSTOMIZE SELECTED PLAYER</div><h3>${esc(target.name||'Player')}'s pen</h3><p>Selected: <b>${esc((PENS[target.pen]||PENS[0]).n)}</b></p></div><span class="editor-badge" style="--player-color:${PC[setupTarget]}">${target.ai?'AI':'HUMAN'}</span></div>
+   <div class="player-fields"><label>Display name<input type="text" data-k=name data-i=${setupTarget} value="${esc(target.name)}" maxlength="14" aria-label="Selected player name"></label><label>Controller<select data-k=ai data-i=${setupTarget} aria-label="Selected player controller">${options(['Human','AI Easy','AI Medium','AI Hard'],target.ai)}</select></label></div>
+   <div class="gallery-head"><h4>Choose a pen</h4><span>${PENS.length} PEN SKINS</span></div>
+   <div class="pen-gallery">${PENS.map((p,i)=>`<button type="button" class="pen-option ${target.pen===i?'selected':''}" data-a=choosepen data-v=${i} aria-pressed="${target.pen===i}" style="--player-color:${PC[setupTarget]}"><span class="pen-art">${penVisual(i)}</span><span class="pen-option-name">${esc(p.n)}</span><span class="pen-option-status">${target.pen===i?'✓ SELECTED':'SELECT PEN'}</span></button>`).join('')}</div>
+  </div>
+  <div class="setup-footer"><span>Pen selection is saved for this match.</span><div class="g2"><button data-a=menu>Back</button><button class="pr" data-a=go>Start match <span>→</span></button></div></div>
+ </div>`)
+}function rules(){show(`<h2>How to play</h2><h3>Core rules</h3><ol class=steps><li>Every player gets one pen on the bench.</li><li>Players take turns.</li><li>Grab your pen anywhere along its length and drag backward to aim. Where you hit it decides how it spins.</li><li>Release to flick.</li><li>Hit opponents’ pens toward the edge.</li><li>Keep your own pen on the bench.</li><li>The last pen on the bench wins.</li></ol>
  <h3>This version’s details</h3><p class=mu>A pen is out when its centre passes the bench edge and it has stopped moving; touching the edge is safe. You can only flick your own pen. If everyone falls in the same turn, it’s a draw. Online play is not implemented.</p>
  <h3>Optional house options</h3><p class=mu>Aim assist line, accuracy variation, flick strength and surface (classic, slick, grippy) are in Settings.</p><div class=g><button class=pr data-a=menu>Back</button></div>`)}
 function end(w){G.st='over';G.win=w;if(w)w.rank=1;hud();
