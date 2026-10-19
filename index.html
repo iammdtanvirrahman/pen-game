@@ -114,6 +114,14 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 .player-fields input,.player-fields select{width:100%;min-width:0;background:#19191f;padding:10px 12px;font-size:13px}
 .gallery-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.gallery-head h4{font-size:13px;margin:0}
 .pen-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.bench-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.bench-option{min-width:0;display:flex;flex-direction:column;gap:7px;text-align:left;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px;color:var(--tx)}
+.bench-option.selected{border-color:#e34355;background:linear-gradient(150deg,rgba(227,67,85,.14),#17171c);box-shadow:inset 0 0 0 1px rgba(227,67,85,.3)}
+.bench-art{height:76px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;background:#222228}
+.bench-art img{width:100%;height:100%;object-fit:contain}
+.bench-option strong{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bench-option small{font-size:9px;letter-spacing:.08em;color:#92929e;font-weight:900}
+.bench-option.selected small{color:#ff8996}
 .pen-option{min-width:0;text-align:left;display:flex;flex-direction:column;gap:7px;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px}
 .pen-option.selected{border-color:var(--player-color);background:linear-gradient(150deg,color-mix(in srgb,var(--player-color) 13%,#17171c),#17171c)}
 .pen-option-name{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -151,7 +159,7 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const ord=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th');
 
 /* ---------- constants ---------- */
-const W=960,H=600,B={x:40,y:40,w:880,h:520,r:26},CX=B.x+B.w/2,CY=B.y+B.h/2,PL=84,PW=11,MAXD=150,VMAX=22,Q=4;
+const W=960,H=600,DEFAULT_B={x:40,y:40,w:880,h:520,r:26};let B={...DEFAULT_B};const CX=W/2,CY=H/2,PL=84,PW=11,MAXD=150,VMAX=22,Q=4;
 const PC=['#3b82f6','#f59e0b','#22c55e','#a855f7','#06b6d4','#ec4899'];
 const PENS=[
  {n:'Blue ballpoint',k:'click',c:'#1e40af',g:'#14171d',ink:'#1e40af'},
@@ -186,9 +194,10 @@ let AC;const snd=(f,d,ty='sine',v=.2,f2)=>{if(!S.snd||!S.vol)return;try{AC=AC||n
 const Assets={bench:{img:null,proc:null},cache:new Map(),
  load(src){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src})},
  addPen(d){d.n=d.n||'Custom pen';d.c=d.c||'#888';if(d.src)this.load(d.src).then(i=>{d.img=i;this.cache.clear()}).catch(()=>toast('Pen image failed to load'));PENS.push(d);return PENS.length-1},
- async setBench(src){if(!src){this.bench.img=null;return}try{this.bench.img=await this.load(src)}catch(e){toast('Bench image failed to load')}},
+ async setBench(src){if(!src){this.bench.img=null;B={...DEFAULT_B};return}try{const img=await this.load(src);this.bench.img=img;const iw=img.naturalWidth||img.width||W,ih=img.naturalHeight||img.height||H,fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;B={x:(W-dw)/2,y:(H-dh)/2,w:dw,h:dh,r:Math.min(DEFAULT_B.r*fit,dw/2,dh/2)}}catch(e){toast('Bench image failed to load')}},
  async loadManifest(m){if(m.bench&&m.bench.src)await this.setBench(m.bench.src);for(const p of m.pens||[])this.addPen({...p})},
- reset(){this.bench.img=null;PENS.length=BUILTIN;this.cache.clear()}};
+ async loadBenchDirectory(){const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/bench';const res=await fetch(api+'?ref=3.0&per_page=100',{headers:{Accept:'application/vnd.github+json'}});if(!res.ok)throw new Error('Bench directory unavailable ('+res.status+')');const files=await res.json();benchSkins=(Array.isArray(files)?files:[]).filter(f=>f.type==='file'&&/\.(png|webp|jpe?g|gif|avif)$/i.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({n:f.name.replace(/\.(png|webp|jpe?g|gif|avif)$/i,'').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).slice(0,32),src:f.download_url||'https://raw.githubusercontent.com/iammdtanvirrahman/pen-game/3.0/'+f.path.split('/').map(encodeURIComponent).join('/')}));return benchSkins.length},
+ reset(){this.bench.img=null;B={...DEFAULT_B};PENS.length=BUILTIN;this.cache.clear()}};
 window.PenGame={Assets,PENS,PC,Q,start:c=>{begin(normCfg(c));hide()}};
 try{const saved=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(saved))saved.forEach(p=>{if(p&&p.src)Assets.addPen(p)})}catch(e){}
 {const m=new URLSearchParams(location.search).get('assets');if(m)fetch(m).then(r=>r.json()).then(j=>Assets.loadManifest(j)).catch(()=>toast('Could not load asset manifest'))}
@@ -394,7 +403,7 @@ function aimAssist(p,a,pw){const sp=3+(VMAX*S.pw-3)*Math.pow(pw,1.3),sw=sweep(p,
  cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,.65)';cx.strokeText(lbl,tx,ty);cx.fillStyle=col;cx.fillText(lbl,tx,ty);cx.restore()}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);cx.drawImage(Assets.bench.img||Assets.bench.proc||fallback,0,0,W,H);if(!G)return;
+ cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);{const benchImg=Assets.bench.img||Assets.bench.proc||fallback;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;if(Assets.bench.img){const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}else cx.drawImage(benchImg,0,0,W,H)}}if(!G)return;
  if(S.ink){cx.globalCompositeOperation='multiply';cx.drawImage(ink,0,0,W,H);cx.globalCompositeOperation='source-over'}
  const now=performance.now(),cur=G.pl[G.t];
  for(const o of G.obs){cx.save();cx.translate(o.x,o.y);cx.rotate(o.a);cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=8*sc;cx.shadowOffsetX=3*sc;cx.shadowOffsetY=5*sc;cx.drawImage(o.sp.c,-o.sp.w/2,-o.sp.h/2,o.sp.w,o.sp.h);cx.restore()}
@@ -461,7 +470,7 @@ function makeBench(){const Qb=1.25,w=Math.round(W*Qb),h=Math.round(H*Qb),c=docum
  step()}
 
 /* ---------- screens ---------- */
-const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false;
+const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false,benchSkins=[],benchDirectoryReady=false,selectedBenchSrc='';
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
 function focusKey(){const a=document.activeElement;if(!a||!scr.contains(a))return null;const d=a.dataset;return d.a?`[data-a="${d.a}"]${d.v!=null?`[data-v="${d.v}"]`:''}`:d.k?`[data-k="${d.k}"][data-i="${d.i}"]`:null}
 function show(h,keep){const old=scr.querySelector('.p'),top=keep&&old?old.scrollTop:0,fk=keep?focusKey():null;
@@ -491,6 +500,10 @@ function setupUI(keep){
    <div class="roster-grid">${cfg.pl.slice(0,cfg.n).map((p,i)=>`<button type="button" class="roster-card ${setupTarget===i?'active':''}" data-a="target" data-v="${i}" style="--player-color:${PC[i]}">
     <div class="roster-head"><span class="roster-dot"></span><span class="role-label">${role(p,i)}</span><span class="roster-num">0${i+1}</span></div>
     <div class="roster-preview">${penImg(p.pen,i)}</div><strong>${esc(p.name||'Player')}</strong><span class="roster-pen-name">${esc((PENS[p.pen]||PENS[0]).n)}</span><span class="roster-edit">${setupTarget===i?'EDITING PEN':'EDIT PEN ↗'}</span></button>`).join('')}</div>
+  </div>
+  <div class="setup-section"><div class="section-head"><div><h3>Choose your bench</h3><p>Images load from assets/bench/. The visible image edge is the knockout boundary.</p></div><div class="gallery-head"><span>${benchSkins.length} BENCH SKINS</span></div></div>
+   <div class="bench-gallery"><button type="button" class="bench-option ${selectedBenchSrc===''?'selected':''}" data-a="choosebench" data-v="-1"><span class="bench-art"><span style="width:90%;height:70%;border:5px solid #55351e;border-radius:8px;background:repeating-linear-gradient(0deg,#8d592e 0 18px,#633b20 19px 22px)"></span></span><strong>Classic wooden bench</strong><small>${selectedBenchSrc===''?'✓ SELECTED':'USE DEFAULT'}</small></button>${benchSkins.map((b,i)=>`<button type="button" class="bench-option ${selectedBenchSrc===b.src?'selected':''}" data-a="choosebench" data-v="${i}"><span class="bench-art"><img src="${esc(b.src)}" alt="${esc(b.n)}" loading="lazy"></span><strong>${esc(b.n)}</strong><small>${selectedBenchSrc===b.src?'✓ SELECTED':'SELECT BENCH'}</small></button>`).join('')}</div>
+   ${benchDirectoryReady&&!benchSkins.length?'<p class="mu">No bench images found. Add PNG/JPG/WebP files to assets/bench/ on branch 3.0.</p>':''}
   </div>
   <div class="setup-section"><div class="section-head"><div><h3>Match rules</h3><p>The clock skips a human turn when it runs out. Clutter adds solid objects pens bounce off.</p></div></div>
    <div class="rules-grid"><div class="rule"><span>SERIES</span>${seg('series',SERIES)}</div><div class="rule"><span>SHOT CLOCK</span>${seg('clock',CLOCKS)}</div><div class="rule"><span>BENCH CLUTTER</span>${seg('clutter',CLUTTER)}</div></div>
@@ -523,10 +536,11 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
  target:()=>{setupTarget=+d.v;setupUI(true)},
  choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+d.v;setupUI(true)},
+ choosebench:()=>{const i=+d.v;selectedBenchSrc=i<0?'':(benchSkins[i]||{}).src||'';Assets.setBench(selectedBenchSrc||null).then(()=>{toast(selectedBenchSrc?'Bench selected':'Default bench selected');setupUI(true)})},
  rule:()=>{cfg[d.r]=+d.v;setupUI(true)},
- quick:()=>{const s0=ld('pg.cfg',{});begin(normCfg({series:+s0.series,clock:+s0.clock,clutter:+s0.clutter,pl:[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))}));hide()},
+ quick:()=>{const s0=ld('pg.cfg',{});Assets.setBench(selectedBenchSrc||null).then(()=>{begin(normCfg({series:+s0.series,clock:+s0.clock,clutter:+s0.clutter,pl:[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))}));hide()})},
  go:()=>{const c=normCfg({series:cfg.series,clock:cfg.clock,clutter:cfg.clutter,pl:cfg.pl.slice(0,cfg.n)});
-  sv('pg.cfg',{...(setupPractice?ld('pg.cfg',{}):{n:cfg.n,pl:cfg.pl}),series:cfg.series,clock:cfg.clock,clutter:cfg.clutter});begin(c);hide()},
+  sv('pg.cfg',{...(setupPractice?ld('pg.cfg',{}):{n:cfg.n,pl:cfg.pl}),series:cfg.series,clock:cfg.clock,clutter:cfg.clutter});Assets.setBench(selectedBenchSrc||null).then(()=>{begin(c);hide()})},
  rr:()=>{if(M){round();hide()}},
  rst:()=>{if(M){begin(M.cfg);hide()}},
  next:()=>{if(M){M.round++;round();hide()}},
@@ -542,6 +556,7 @@ document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.datase
    try{localStorage.setItem('pg.customPens',JSON.stringify(PENS.slice(BUILTIN).map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}))))}catch(err){toast('Pen added for this session, but browser storage is full');return}
    toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
 
+Assets.loadBenchDirectory().then(()=>{benchDirectoryReady=true}).catch(e=>{console.warn('Bench asset list failed',e);benchDirectoryReady=true});
 rs();requestAnimationFrame(loop);menu();setTimeout(makeBench,60);
 })();
 </script>
