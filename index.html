@@ -1,53 +1,13 @@
 <!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101014">
-  <meta name="description" content="বাংলাদেশের স্কুলের বেঞ্চের কলম খেলার ব্রাউজার গেম — কলম খেলবি?">
-  <title>কলম খেলবি? — Pen Battle</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#151311"><title>কলম খেলবি? — Pen Game 2.0</title><link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <main class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#home" aria-label="কলম খেলবি হোম"><span class="brand-mark">✎</span><span>কলম খেলবি<span class="brand-dot">?</span></span></a>
-      <span class="eyebrow">SCHOOL BENCH • PEN BATTLE</span>
-    </header>
-
-    <section id="home" class="hero">
-      <div class="hero-copy">
-        <p class="kicker"><span class="status-dot"></span> বেঞ্চের লড়াই শুরু হোক</p>
-        <h1>কলম খেলবি<span>?</span></h1>
-        <p class="subtitle">একটা বেঞ্চ। কয়েকটা কলম। শেষ পর্যন্ত টিকে থাকবে কে?</p>
-        <p class="description">কলমে ফ্লিক মারো, প্রতিপক্ষকে বেঞ্চ থেকে ফেলে দাও—কিন্তু সাবধান, তোমার কলমটাও যেন না পড়ে!</p>
-        <div class="actions"><button id="play-button" class="button button-primary">▶ খেলা শুরু করো</button><button id="how-button" class="button button-secondary">কীভাবে খেলবে?</button></div>
-        <div class="mini-stats"><div><strong>৪</strong><span>জন খেলোয়াড়</span></div><div><strong>১</strong><span>বেঞ্চ চ্যাম্পিয়ন</span></div><div><strong>∞</strong><span>রিম্যাচ</span></div></div>
-      </div>
-      <div class="hero-art" aria-label="কাঠের বেঞ্চে চারটি রঙিন কলমের চিত্র">
-        <div class="art-tag tag-top">ROUND <b>01</b></div>
-        <div class="desk-lines"></div>
-        <div class="doodle doodle-star">✳</div><div class="doodle doodle-heart">♡</div><div class="doodle doodle-note">কলম খেলবি?</div>
-        <div class="pen pen-blue"><i></i></div><div class="pen pen-black"><i></i></div><div class="pen pen-red"><i></i></div><div class="pen pen-green"><i></i></div>
-        <div class="art-tag tag-bottom"><span class="status-dot"></span> YOUR TURN</div>
-      </div>
-    </section>
-
-    <section id="game-section" class="game-section hidden">
-      <div class="section-heading"><div><p class="kicker">LIVE MATCH</p><h2>বেঞ্চে নামো</h2></div><div class="round-pill">রাউন্ড <strong id="round-label">১</strong></div></div>
-      <div class="game-hud"><div class="player-chip you"><span class="player-dot"></span><span><b>তুমি</b><small id="you-state">তোমার চাল</small></span></div><div class="player-chip"><span class="player-dot blue"></span><span><b>নীল</b><small id="p2-state">খেলছে</small></span></div><div class="player-chip"><span class="player-dot green"></span><span><b>সবুজ</b><small id="p3-state">খেলছে</small></span></div><div class="player-chip"><span class="player-dot gold"></span><span><b>হলুদ</b><small id="p4-state">খেলছে</small></span></div></div>
-      <div class="canvas-wrap"><canvas id="game-canvas" aria-label="কলমের খেলার মাঠ"></canvas><div id="game-message" class="game-message hidden" role="status"><span class="message-emoji">🏆</span><h3 id="message-title">তুমি জিতেছ!</h3><p id="message-text">শেষ কলম হিসেবে টিকে গেছ।</p><button id="rematch-button" class="button button-primary">আবার খেলি ↻</button></div></div>
-      <div class="game-controls"><div class="instruction"><span class="instruction-icon">↙</span><span><b>টেনে ছাড়ো</b><small>কলমের কাছ থেকে পিছনে টেনে ছেড়ে দাও</small></span></div><div class="control-actions"><button id="restart-button" class="button button-secondary">↻ নতুন ম্যাচ</button><button id="home-button" class="button button-quiet">হোমে ফিরো</button></div></div>
-      <p class="mobile-hint">মোবাইলে: কলমের পাশে আঙুল রাখো, পিছনে টানো, তারপর ছেড়ে দাও।</p>
-    </section>
-
-    <section id="how-section" class="how-section">
-      <div class="section-heading"><div><p class="kicker">সহজ নিয়ম, জমজমাট লড়াই</p><h2>খেলবে যেভাবে</h2></div><span class="section-number">01 — 03</span></div>
-      <div class="rule-grid"><article class="rule-card"><span class="rule-number">01</span><div class="rule-icon">✎</div><h3>কলম বেছে নাও</h3><p>তোমার কলমের কাছে টাচ বা ক্লিক করো। প্রতিপক্ষের কলমগুলোর অবস্থান দেখে নাও।</p></article><article class="rule-card"><span class="rule-number">02</span><div class="rule-icon">↗</div><h3>ফ্লিক মেরে আঘাত করো</h3><p>কলম থেকে পিছনের দিকে টেনে ছেড়ে দাও। যত দূর টানবে, ধাক্কা তত জোরে হবে।</p></article><article class="rule-card"><span class="rule-number">03</span><div class="rule-icon">♛</div><h3>শেষ পর্যন্ত টিকে থাকো</h3><p>যে কলম বেঞ্চের বাইরে চলে যায়, সে আউট। শেষ কলমটাই জয়ী!</p></article></div>
-    </section>
-
-    <footer class="footer"><a class="brand footer-brand" href="#home"><span class="brand-mark">✎</span><span>কলম খেলবি<span class="brand-dot">?</span></span></a><span>স্কুলের বেঞ্চের স্মৃতি থেকে তৈরি, বাংলাদেশের জন্য।</span><a href="https://github.com/iammdtanvirrahman/pen-game" target="_blank" rel="noreferrer">GitHub repository ↗</a></footer>
-  </main>
-  <script src="game.js"></script>
-</body>
-</html>
+<body><main class="app">
+<header><a class="wordmark" href="#">কলম খেলবি<span>?</span></a><span class="version">PEN GAME <b>2.0</b></span></header>
+<section class="arena-section"><div class="game-top"><div><span class="live-dot"></span><span id="status">ম্যাচের জন্য প্রস্তুত</span></div><div class="score"><span id="alive-count">৪</span><small>কলম বাকি</small></div></div>
+<div class="table-wrap"><canvas id="board" aria-label="কলমের বেঞ্চ"></canvas><div id="overlay" class="overlay"><div class="overlay-card"><div class="mark">✳</div><h1>কলম খেলবি<span>?</span></h1><p>শেষ কলম পর্যন্ত টিকে থাকো।</p><button id="start" class="primary">খেলা শুরু</button></div></div></div>
+<div class="players"><div class="player active" id="player-0"><i class="red"></i><span>তুমি</span><b>YOU</b></div><div class="player" id="player-1"><i class="blue"></i><span>নীল</span><b>AI</b></div><div class="player" id="player-2"><i class="green"></i><span>সবুজ</span><b>AI</b></div><div class="player" id="player-3"><i class="yellow"></i><span>হলুদ</span><b>AI</b></div></div>
+<div class="bottom-bar"><span id="hint">নিজের কলমে টাচ করে পিছনে টেনে ছেড়ে দাও</span><button id="again" class="secondary">↻ আবার খেলি</button></div></section>
+<footer><span>স্কুলের বেঞ্চ থেকে, ভালোবাসা নিয়ে।</span><a href="https://github.com/iammdtanvirrahman/pen-game/tree/2.0">SOURCE ↗</a></footer>
+</main><script src="game.js"></script></body></html>
