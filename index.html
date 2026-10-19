@@ -8,6 +8,14 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:16px/1.
 body{display:flex;flex-direction:column}
 #stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 #c{touch-action:none;display:block;border-radius:12px}
+@media (max-width:900px) and (orientation:landscape){
+ body{height:100dvh;padding:4px max(6px,env(safe-area-inset-left,0px)) 4px max(6px,env(safe-area-inset-right,0px))}
+ #top{flex-wrap:nowrap;gap:6px;padding:4px 7px;min-height:38px}
+ #stage{flex:1;min-height:0;width:100%;overflow:hidden}
+ #c{max-width:100%;max-height:100%;width:auto;height:auto;border-radius:8px}
+ button,select,input{padding:6px 9px;font-size:12px}
+}
+@media (max-width:900px) and (orientation:portrait){#stage{min-height:0}#c{max-width:100%;max-height:100%}}
 #top{display:none;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap}
 #turn{font-weight:600;display:flex;align-items:center;gap:8px}#turn small{color:var(--mu);font-weight:400}
 #turn i{animation:pop .4s}@keyframes pop{from{transform:scale(2.2)}}
