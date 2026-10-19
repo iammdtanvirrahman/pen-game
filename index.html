@@ -11,6 +11,12 @@ html,body{height:100%;margin:0}
 html:fullscreen,html:fullscreen body{width:100%;height:100%;overflow:hidden}
 html:fullscreen body{padding:0!important;gap:0!important}
 html:fullscreen body #top{flex-shrink:0;margin:0;border-radius:0}
+html:fullscreen body.immersive #top{display:none!important}
+html:fullscreen body.immersive #stage{width:100vw;height:100dvh;flex:1;min-height:0;margin:0;padding:0}
+html:fullscreen body.immersive #c{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0!important}
+body.immersive:not(:fullscreen) #top{display:none!important}
+body.immersive:not(:fullscreen) #stage{height:100dvh;width:100vw}
+
 html:fullscreen body #stage{width:100vw;height:calc(100dvh - var(--hud-height, 48px));flex:1;min-height:0;padding:0;margin:0}
 html:fullscreen body #c{max-width:none!important;max-height:none!important;border-radius:0!important}
 @media (max-width:900px) and (orientation:landscape){
@@ -174,6 +180,7 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
  <div id="pwr" title="Flick power"><div id="pwf"></div></div>
  <button data-a="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
  <button data-a="rr" aria-label="Restart round"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg></button>
+ <button id="landscapeBtn" type="button" aria-label="Landscape fullscreen" title="Landscape fullscreen">⛶</button>
  <button data-a="menu" aria-label="Main menu"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>
 </div>
 <div id="stage"><canvas id="c" aria-label="Pen Game bench"></canvas></div>
@@ -562,6 +569,29 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'sele
 
 let rsT=0;
 /* Android: request landscape when a match is launched; browser/device support varies. */
+async function enterLandscapeFullscreen(){
+ const body=document.body;
+ try{
+  if(!document.fullscreenElement&&document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({navigationUI:'hide'});
+ }catch(e){toast('Fullscreen unavailable in this browser');return}
+ body.classList.add('immersive');
+ try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){toast('Rotate your phone to landscape')}
+ requestAnimationFrame(()=>{rs();});
+}
+function leaveLandscapeFullscreen(){
+ document.body.classList.remove('immersive');
+ try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch(e){}
+ if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+ requestAnimationFrame(()=>rs());
+}
+$('#landscapeBtn').addEventListener('click',()=>{
+ if(document.body.classList.contains('immersive'))leaveLandscapeFullscreen();
+ else enterLandscapeFullscreen();
+});
+document.addEventListener('fullscreenchange',()=>{
+ if(!document.fullscreenElement)document.body.classList.remove('immersive');
+ requestAnimationFrame(()=>rs());
+});
 function requestGameLandscape(){
  if(!/Android|Mobile/i.test(navigator.userAgent))return;
  const goFull=()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
