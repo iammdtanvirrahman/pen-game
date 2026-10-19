@@ -107,6 +107,15 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 .gallery-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 .gallery-head h4{font-size:13px;margin:0}
 .pen-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.bench-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.bench-option{display:flex;min-width:0;flex-direction:column;gap:7px;text-align:left;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px}
+.bench-option.selected{border-color:#e34355;background:linear-gradient(150deg,rgba(227,67,85,.14),#17171c);box-shadow:inset 0 0 0 1px rgba(227,67,85,.3)}
+.bench-art{height:76px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;background:#222228}
+.bench-art img{width:100%;height:100%;object-fit:contain}
+.bench-art.procedural-bench{background:linear-gradient(135deg,#70451f,#b98248 30%,#7d4b25 55%,#b27b43 75%,#60391d);border:5px solid #4b2c17;box-shadow:inset 0 0 0 2px #d6a16a}
+.bench-option strong{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bench-option small{font-size:9px;letter-spacing:.08em;color:#92929e;font-weight:900}
+.bench-option.selected small{color:#ff8996}
 .pen-option{min-width:0;text-align:left;display:flex;flex-direction:column;gap:7px;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px}
 .pen-option.selected{border-color:var(--player-color);background:linear-gradient(150deg,color-mix(in srgb,var(--player-color) 13%,#17171c),#17171c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--player-color) 30%,transparent)}
 .pen-art{height:55px;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;background:radial-gradient(ellipse,#292930,#1a1a1f 75%)}
@@ -293,7 +302,7 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(50,t-last||16);la
  if(G&&!paused&&G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);acc-=h;c++}if(c>=24)acc=0;simCheck(dt)}
  draw(t,dt)}
 /* ---------- UI ---------- */
-const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false,penDirectoryPromise=Promise.resolve(0),penDirectoryReady=false;
+const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false,penDirectoryPromise=Promise.resolve(0),penDirectoryReady=false,benchSkins=[],benchDirectoryReady=false,benchDirectoryPromise=Promise.resolve(0),selectedBenchSrc='';
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
 function show(h){scr.innerHTML=`<div class="p" role="dialog" aria-modal="true">${h}</div>`;scr.style.display='flex';const f=scr.querySelector('button,select,input');f&&f.focus()}
 function hide(){scr.style.display='none'}
@@ -323,9 +332,10 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value=${k} ${k==v?'select
  <label>Aim assist line <input type=checkbox data-s=asst ${S.asst?'checked':''}></label><label>Accuracy variation <input type=checkbox data-s=acc ${S.acc?'checked':''}></label>
  <p class=mu>Strength and surface apply from the next match.</p><div class=g><button class=pr data-a=menu>Done</button></div>`)}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const f={
- setup:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>setup(0))},prac:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>setup(1))},rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI()},target:()=>{setupTarget=+a.dataset.v;setupUI()},choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+a.dataset.v;setupUI()},
- quick:()=>{if(!penDirectoryReady)toast('Loading pen library…');penDirectoryPromise.then(()=>{start([0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i})));hide()})},
- go:()=>{start(cfg.pl.slice(0,cfg.n).map(p=>({...p,name:p.name.trim()||'Player'})));hide()},
+ setup:()=>{if(!penDirectoryReady||!benchDirectoryReady)toast('Loading asset libraries…');Promise.all([penDirectoryPromise,benchDirectoryPromise]).then(()=>setup(0))},prac:()=>{if(!penDirectoryReady||!benchDirectoryReady)toast('Loading asset libraries…');Promise.all([penDirectoryPromise,benchDirectoryPromise]).then(()=>setup(1))},rules,set:sett,menu,pause:pz,res:resume,n:()=>{cfg.n=+a.dataset.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI()},target:()=>{setupTarget=+a.dataset.v;setupUI()},choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+a.dataset.v;setupUI()},
+ choosebench:()=>{const i=+a.dataset.v;selectedBenchSrc=i<0?'':(benchSkins[i]||{}).src||'';Assets.setBench(selectedBenchSrc||null).then(()=>{toast(selectedBenchSrc?'Bench selected':'Default bench selected');setupUI()})},
+ quick:()=>{if(!penDirectoryReady||!benchDirectoryReady)toast('Loading asset libraries…');Promise.all([penDirectoryPromise,benchDirectoryPromise]).then(()=>{Assets.setBench(selectedBenchSrc||null).then(()=>{start([0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i})));hide()})})},
+ go:()=>{Assets.setBench(selectedBenchSrc||null).then(()=>{start(cfg.pl.slice(0,cfg.n).map(p=>({...p,name:p.name.trim()||'Player'})));hide()})},
  rst:()=>{if(G){start(G.cfg);hide()}}}[a.dataset.a];f&&f()});
 document.addEventListener('input',e=>{const el=e.target,d=el.dataset;
  if(d.s){S[d.s]=el.type==='checkbox'?+el.checked:(el.type==='range'||d.s==='pw')?+el.value:el.value;sv('pg.s',S);document.body.classList.toggle('rm',!!S.rm)}
@@ -354,13 +364,18 @@ function setupUI(){
     <div class="roster-preview">${penVisual(p.pen,true)}</div><strong>${esc(p.name||'Player')}</strong><span class="roster-pen-name">${esc((PENS[p.pen]||PENS[0]).n)}</span><span class="roster-edit">${setupTarget===i?'EDITING PEN':'EDIT PEN ↗'}</span>
    </button>`).join('')}</div>
   </div>
+  <div class="setup-section bench-picker-section"><div class="section-head"><div><h3>02 / Choose your bench</h3><p>Bench images are loaded automatically from <code>assets/bench/</code>.</p></div><span class="gallery-head">${benchSkins.length} BENCH SKINS</span></div>
+   <div class="bench-gallery"><button type="button" class="bench-option ${selectedBenchSrc===''?'selected':''}" data-a="choosebench" data-v="-1"><span class="bench-art procedural-bench"></span><strong>Classic wooden bench</strong><small>${selectedBenchSrc===''?'✓ SELECTED':'USE DEFAULT'}</small></button>
+   ${benchSkins.map((b,i)=>`<button type="button" class="bench-option ${selectedBenchSrc===b.src?'selected':''}" data-a="choosebench" data-v="${i}"><span class="bench-art"><img src="${esc(b.src)}" alt="${esc(b.n)}" loading="lazy"></span><strong>${esc(b.n)}</strong><small>${selectedBenchSrc===b.src?'✓ SELECTED':'SELECT BENCH'}</small></button>`).join('')}</div>
+   ${benchDirectoryReady&&!benchSkins.length?'<p class="mu">No image files found yet. Add PNG, JPG, or WebP images to assets/bench/ in the repository.</p>':''}
+  </div>
   <div class="pen-editor">
-   <div class="editor-title"><div><div class="setup-kicker">02 / CUSTOMIZE SELECTED PLAYER</div><h3>${esc(target.name||'Player')}'s pen</h3><p>Selected: <b>${esc((PENS[target.pen]||PENS[0]).n)}</b></p></div><span class="editor-badge" style="--player-color:${PC[setupTarget]}">${target.ai?'AI':'HUMAN'}</span></div>
+   <div class="editor-title"><div><div class="setup-kicker">03 / CUSTOMIZE SELECTED PLAYER</div><h3>${esc(target.name||'Player')}'s pen</h3><p>Selected: <b>${esc((PENS[target.pen]||PENS[0]).n)}</b></p></div><span class="editor-badge" style="--player-color:${PC[setupTarget]}">${target.ai?'AI':'HUMAN'}</span></div>
    <div class="player-fields"><label>Display name<input type="text" data-k=name data-i=${setupTarget} value="${esc(target.name)}" maxlength="14" aria-label="Selected player name"></label><label>Controller<select data-k=ai data-i=${setupTarget} aria-label="Selected player controller">${options(['Human','AI Easy','AI Medium','AI Hard'],target.ai)}</select></label></div>
    <div class="gallery-head"><h4>Choose a pen</h4><span>${PENS.length} PEN SKINS</span></div>
    <div class="pen-gallery">${PENS.map((p,i)=>`<button type="button" class="pen-option ${target.pen===i?'selected':''}" data-a=choosepen data-v=${i} aria-pressed="${target.pen===i}" style="--player-color:${PC[setupTarget]}"><span class="pen-art">${penVisual(i)}</span><span class="pen-option-name">${esc(p.n)}</span><span class="pen-option-status">${target.pen===i?'✓ SELECTED':'SELECT PEN'}</span></button>`).join('')}</div>
   </div>
-  <div class="setup-footer"><span>Pen selection is saved for this match.</span><div class="g2"><button data-a=menu>Back</button><button class="pr" data-a=go>Start match <span>→</span></button></div></div>
+  <div class="setup-footer"><span>Pen and bench selections apply to this match.</span><div class="g2"><button data-a=menu>Back</button><button class="pr" data-a=go>Start match <span>→</span></button></div></div>
  </div>`)
 }function rules(){show(`<h2>How to play</h2><h3>Core rules</h3><ol class=steps><li>Every player gets one pen on the bench.</li><li>Players take turns.</li><li>Grab your pen anywhere along its length and drag backward to aim. Where you hit it decides how it spins.</li><li>Release to flick.</li><li>Hit opponents’ pens toward the edge.</li><li>Keep your own pen on the bench.</li><li>The last pen on the bench wins.</li></ol>
  <h3>This version’s details</h3><p class=mu>A pen is out when its centre passes the bench edge and it has stopped moving; touching the edge is safe. You can only flick your own pen. If everyone falls in the same turn, it’s a draw. Online play is not implemented.</p>
@@ -389,6 +404,13 @@ const Assets={bench:{img:null,proc:null},cache:new Map(),
  addPen(d){d.n=d.n||'Custom pen';d.c=d.c||'#888';if(d.src)this.load(d.src).then(i=>{d.img=i;this.cache.clear()}).catch(()=>toast('Pen image failed to load'));PENS.push(d);return PENS.length-1},
  async setBench(src){if(!src){this.bench.img=null;return}try{this.bench.img=await this.load(src)}catch(e){toast('Bench image failed to load')}},
  async loadManifest(m){if(m.bench&&m.bench.src)await this.setBench(m.bench.src);for(const p of m.pens||[])this.addPen({...p})},
+ async loadBenchDirectory(){
+  const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/bench';
+  const res=await fetch(api+'?ref=main&per_page=100',{headers:{Accept:'application/vnd.github+json'}});
+  if(res.status===404){benchSkins=[];return 0}if(!res.ok)throw new Error('Bench asset directory could not be listed ('+res.status+')');
+  const files=await res.json();benchSkins=(Array.isArray(files)?files:[]).filter(f=>f.type==='file'&&/\.(png|webp|jpe?g|gif|avif)$/i.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({n:f.name.replace(/\.(png|webp|jpe?g|gif|avif)$/i,'').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).slice(0,32),src:f.download_url||'https://raw.githubusercontent.com/iammdtanvirrahman/pen-game/main/'+f.path.split('/').map(encodeURIComponent).join('/')}));
+  return benchSkins.length;
+ },
  async loadPenDirectory(){
   const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/pens';
   const existing=new Set(PENS.map(p=>p.src).filter(Boolean));let page=1,added=0;
@@ -414,6 +436,7 @@ window.PenGame={Assets,PENS,PC,start,Q};
 // Restore custom pen skins uploaded in Settings on this browser.
 try{const savedPens=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(savedPens))savedPens.forEach(p=>{if(p&&p.src)Assets.addPen({...p,origin:'local'})})}catch(e){}
 penDirectoryPromise=Assets.loadPenDirectory().then(n=>{penDirectoryReady=true;return n}).catch(e=>{console.warn('Could not auto-load assets/pens:',e);penDirectoryReady=true;return 0});
+benchDirectoryPromise=Assets.loadBenchDirectory().then(n=>{benchDirectoryReady=true;return n}).catch(e=>{console.warn('Could not auto-load assets/bench:',e);benchDirectoryReady=true;return 0});
 {const m=new URLSearchParams(location.search).get('assets');if(m)fetch(m).then(r=>r.json()).then(j=>Assets.loadManifest(j)).catch(()=>toast('Could not load asset manifest'))}
 /* ---- procedural pen sprite (drawn once per pen+player at 4x, then blitted) ---- */
 function drawPen(g,d,pc){
