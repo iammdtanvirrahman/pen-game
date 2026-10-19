@@ -229,8 +229,8 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
  else{ang=best.ang+gs()*(lv===2?.12:.03);pw=pwOf(best.vd)}
  flick(ang,pw)}
 /* ---------- input ---------- */
-const cv=$('#c'),cx=cv.getContext('2d');let sc=1;
-function rs(){const r=$('#stage').getBoundingClientRect(),s=Math.min(r.width/W,r.height/H)||1,d=devicePixelRatio||1;cv.style.width=W*s+'px';cv.style.height=H*s+'px';cv.width=Math.round(W*s*d);cv.height=Math.round(H*s*d);sc=s*d}
+const cv=$('#c'),cx=cv.getContext('2d');let sc=1,scx=1,scy=1;
+function rs(){const r=$('#stage').getBoundingClientRect(),land=matchMedia('(max-width:900px) and (orientation:landscape)').matches,d=Math.min(devicePixelRatio||1,2),sx=land?r.width/W:Math.min(r.width/W,r.height/H),sy=land?r.height/H:sx;cv.style.width=Math.max(1,W*sx)+'px';cv.style.height=Math.max(1,H*sy)+'px';cv.width=Math.round(W*sx*d);cv.height=Math.round(H*sy*d);sc=sx*d;scx=cv.width/W;scy=cv.height/H}
 const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
 const cpOf=(b,t)=>({x:b.position.x+Math.cos(b.angle)*t,y:b.position.y+Math.sin(b.angle)*t});
 cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
@@ -291,7 +291,7 @@ function penOld(g,p,x,y,a,s,al,sh){const d=PENS[p.pen];g.save();g.globalAlpha=al
  g.fillStyle='rgba(255,255,255,.38)';g.fillRect(-PL/2+16,-PW/2+2,PL-34,1.6);g.restore()}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);{const benchImg=Assets.bench.img||Assets.bench.proc||wood;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}}if(!G)return;
+ cx.setTransform(scx,0,0,scy,sx*scx,sy*scy);{const benchImg=Assets.bench.img||Assets.bench.proc||wood;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}}if(!G)return;
  const now=performance.now(),cur=G.pl[G.t];
  if(G.st==='aim'){const b=cur.body.position;const r0=S.rm?34:34+3*Math.sin(t/200),ga=cx.createRadialGradient(b.x,b.y,8,b.x,b.y,r0+14);ga.addColorStop(0,PC[cur.i]+'55');ga.addColorStop(1,PC[cur.i]+'00');cx.fillStyle=ga;cx.beginPath();cx.arc(b.x,b.y,r0+14,0,6.283);cx.fill();cx.strokeStyle=PC[cur.i];cx.lineWidth=2.5;cx.globalAlpha=.85;cx.beginPath();cx.arc(b.x,b.y,r0,0,6.283);cx.stroke();cx.globalAlpha=1}
  for(const p of G.pl){const b=p.body;if(!p.fell){if(p.alive){if(!S.rm&&b.speed>4)for(const m of[4,2])pen(cx,p,b.position.x-b.velocity.x*m,b.position.y-b.velocity.y*m,b.angle,1,.1);pen(cx,p,b.position.x,b.position.y,b.angle,1,1)}}
