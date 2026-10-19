@@ -143,7 +143,7 @@ const {Engine,Bodies,Body,Composite,Events}=Matter;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 /* ---------- constants ---------- */
-const W=960,H=600,B={x:40,y:40,w:880,h:520,r:26},CX=B.x+B.w/2,CY=B.y+B.h/2,PL=84,PW=11,MAXD=150;
+const W=960,H=600,DEFAULT_B={x:40,y:40,w:880,h:520,r:26};let B={...DEFAULT_B};const CX=W/2,CY=H/2,PL=84,PW=11,MAXD=150;
 const PC=['#3b82f6','#f59e0b','#22c55e','#a855f7','#06b6d4','#ec4899'];
 const PENS=[{n:'Blue ballpoint',c:'#2563eb',t:'#111827'},{n:'Black ballpoint',c:'#26262b',t:'#0a0a0a'},{n:'Red ballpoint',c:'#dc2626',t:'#1f2937'},{n:'Clear plastic',c:'rgba(215,235,255,.55)',t:'#374151',ink:'#2563eb'},{n:'Neon green',c:'#84cc16',t:'#334155'},{n:'Orange student',c:'#f97316',t:'#334155'}];
 const PHY={classic:.04,slick:.026,grippy:.06};
@@ -282,7 +282,7 @@ function penOld(g,p,x,y,a,s,al,sh){const d=PENS[p.pen];g.save();g.globalAlpha=al
  g.fillStyle='rgba(255,255,255,.38)';g.fillRect(-PL/2+16,-PW/2+2,PL-34,1.6);g.restore()}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);{const benchImg=Assets.bench.img||Assets.bench.proc||wood;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;/* Cover the entire playfield without distorting the source ratio; crop excess edges instead of leaving black gaps. */const fit=Math.max(W/iw,H/ih),sw=W/fit,sh=H/fit,sx0=(iw-sw)/2,sy0=(ih-sh)/2;cx.drawImage(benchImg,sx0,sy0,sw,sh,0,0,W,H)}}if(!G)return;
+ cx.setTransform(sc,0,0,sc,sx*sc,sy*sc);{const benchImg=Assets.bench.img||Assets.bench.proc||wood;if(benchImg){const iw=benchImg.naturalWidth||benchImg.width||W,ih=benchImg.naturalHeight||benchImg.height||H;const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;cx.drawImage(benchImg,(W-dw)/2,(H-dh)/2,dw,dh)}}if(!G)return;
  const now=performance.now(),cur=G.pl[G.t];
  if(G.st==='aim'){const b=cur.body.position;const r0=S.rm?34:34+3*Math.sin(t/200),ga=cx.createRadialGradient(b.x,b.y,8,b.x,b.y,r0+14);ga.addColorStop(0,PC[cur.i]+'55');ga.addColorStop(1,PC[cur.i]+'00');cx.fillStyle=ga;cx.beginPath();cx.arc(b.x,b.y,r0+14,0,6.283);cx.fill();cx.strokeStyle=PC[cur.i];cx.lineWidth=2.5;cx.globalAlpha=.85;cx.beginPath();cx.arc(b.x,b.y,r0,0,6.283);cx.stroke();cx.globalAlpha=1}
  for(const p of G.pl){const b=p.body;if(!p.fell){if(p.alive){if(!S.rm&&b.speed>4)for(const m of[4,2])pen(cx,p,b.position.x-b.velocity.x*m,b.position.y-b.velocity.y*m,b.angle,1,.1);pen(cx,p,b.position.x,b.position.y,b.angle,1,1)}}
@@ -402,7 +402,7 @@ const Q=4;
 const Assets={bench:{img:null,proc:null},cache:new Map(),
  load(src){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src})},
  addPen(d){d.n=d.n||'Custom pen';d.c=d.c||'#888';if(d.src)this.load(d.src).then(i=>{d.img=i;this.cache.clear()}).catch(()=>toast('Pen image failed to load'));PENS.push(d);return PENS.length-1},
- async setBench(src){if(!src){this.bench.img=null;return}try{this.bench.img=await this.load(src)}catch(e){toast('Bench image failed to load')}},
+ async setBench(src){if(!src){this.bench.img=null;B={...DEFAULT_B};return}try{const img=await this.load(src);this.bench.img=img;const iw=img.naturalWidth||img.width||W,ih=img.naturalHeight||img.height||H;const fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;B={x:(W-dw)/2,y:(H-dh)/2,w:dw,h:dh,r:Math.min(26*fit,dw/2,dh/2)};if(G){for(const p of G.pl){if(p.alive&&!onB(p.body.position.x,p.body.position.y)){p.fell=1;p.ft=performance.now()}}}}catch(e){toast('Bench image failed to load')}},
  async loadManifest(m){if(m.bench&&m.bench.src)await this.setBench(m.bench.src);for(const p of m.pens||[])this.addPen({...p})},
  async loadBenchDirectory(){
   const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/bench';
