@@ -197,7 +197,7 @@ const Assets={bench:{img:null,proc:null},cache:new Map(),
  async setBench(src){if(!src){this.bench.img=null;B={...DEFAULT_B};return}try{const img=await this.load(src);this.bench.img=img;const iw=img.naturalWidth||img.width||W,ih=img.naturalHeight||img.height||H,fit=Math.min(W/iw,H/ih),dw=iw*fit,dh=ih*fit;B={x:(W-dw)/2,y:(H-dh)/2,w:dw,h:dh,r:Math.min(DEFAULT_B.r*fit,dw/2,dh/2)}}catch(e){toast('Bench image failed to load')}},
  async loadManifest(m){if(m.bench&&m.bench.src)await this.setBench(m.bench.src);for(const p of m.pens||[])this.addPen({...p})},
  async loadBenchDirectory(){const api='https://api.github.com/repos/iammdtanvirrahman/pen-game/contents/assets/bench';const res=await fetch(api+'?ref=3.0&per_page=100',{headers:{Accept:'application/vnd.github+json'}});if(!res.ok)throw new Error('Bench directory unavailable ('+res.status+')');const files=await res.json();benchSkins=(Array.isArray(files)?files:[]).filter(f=>f.type==='file'&&/\.(png|webp|jpe?g|gif|avif)$/i.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({n:f.name.replace(/\.(png|webp|jpe?g|gif|avif)$/i,'').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).slice(0,32),src:f.download_url||'https://raw.githubusercontent.com/iammdtanvirrahman/pen-game/3.0/'+f.path.split('/').map(encodeURIComponent).join('/')}));return benchSkins.length},
- reset(){this.bench.img=null;B={...DEFAULT_B};PENS.length=BUILTIN;this.cache.clear()}};
+ reset(){this.bench.img=null;B={...DEFAULT_B};selectedBenchSrc='';try{localStorage.removeItem('pg.benchSrc')}catch(e){}PENS.length=BUILTIN;this.cache.clear()}};
 window.PenGame={Assets,PENS,PC,Q,start:c=>{begin(normCfg(c));hide()}};
 try{const saved=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(saved))saved.forEach(p=>{if(p&&p.src)Assets.addPen(p)})}catch(e){}
 {const m=new URLSearchParams(location.search).get('assets');if(m)fetch(m).then(r=>r.json()).then(j=>Assets.loadManifest(j)).catch(()=>toast('Could not load asset manifest'))}
@@ -536,7 +536,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
  target:()=>{setupTarget=+d.v;setupUI(true)},
  choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+d.v;setupUI(true)},
- choosebench:()=>{const i=+d.v;selectedBenchSrc=i<0?'':(benchSkins[i]||{}).src||'';Assets.setBench(selectedBenchSrc||null).then(()=>{toast(selectedBenchSrc?'Bench selected':'Default bench selected');setupUI(true)})},
+ choosebench:()=>{const i=+d.v;selectedBenchSrc=i<0?'':(benchSkins[i]||{}).src||'';try{if(selectedBenchSrc)localStorage.setItem('pg.benchSrc',selectedBenchSrc);else localStorage.removeItem('pg.benchSrc')}catch(e){}Assets.setBench(selectedBenchSrc||null).then(()=>{toast(selectedBenchSrc?'Bench selected':'Default bench selected');setupUI(true)})},
  rule:()=>{cfg[d.r]=+d.v;setupUI(true)},
  quick:()=>{const s0=ld('pg.cfg',{});Assets.setBench(selectedBenchSrc||null).then(()=>{begin(normCfg({series:+s0.series,clock:+s0.clock,clutter:+s0.clutter,pl:[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))}));hide()})},
  go:()=>{const c=normCfg({series:cfg.series,clock:cfg.clock,clutter:cfg.clutter,pl:cfg.pl.slice(0,cfg.n)});
@@ -556,7 +556,7 @@ document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.datase
    try{localStorage.setItem('pg.customPens',JSON.stringify(PENS.slice(BUILTIN).map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}))))}catch(err){toast('Pen added for this session, but browser storage is full');return}
    toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
 
-Assets.loadBenchDirectory().then(()=>{benchDirectoryReady=true}).catch(e=>{console.warn('Bench asset list failed',e);benchDirectoryReady=true});
+Assets.loadBenchDirectory().then(()=>{benchDirectoryReady=true;try{const savedBench=localStorage.getItem('pg.benchSrc');if(savedBench&&benchSkins.some(b=>b.src===savedBench)){selectedBenchSrc=savedBench;Assets.setBench(savedBench)}}catch(e){}}).catch(e=>{console.warn('Bench asset list failed',e);benchDirectoryReady=true});
 rs();requestAnimationFrame(loop);menu();setTimeout(makeBench,60);
 })();
 </script>
