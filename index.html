@@ -532,6 +532,14 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'sele
  <div class="g2"><button data-a="ares">Reset assets</button><button data-a="rstats">Reset stats</button></div><div class="g"><button class="pr" data-a="menu">Done</button></div>`)}
 
 let rsT=0;
+/* Android: request landscape when a match is launched; browser/device support varies. */
+function requestGameLandscape(){
+ if(!/Android|Mobile/i.test(navigator.userAgent))return;
+ const goFull=()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+ goFull();
+ try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}catch(e){}
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(a&&['quick','go','rst','next'].includes(a.dataset.a))requestGameLandscape()},true);
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const d=a.dataset,f={
  setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,menu,pause:pz,res:resume,
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
