@@ -177,11 +177,12 @@ function flick(ang,pw,t=0){const p=G.pl[G.t],b=p.body;if(S.acc)ang+=(Math.random
  const dx=Math.cos(ang),dy=Math.sin(ang),rx=Math.cos(b.angle)*t,ry=Math.sin(b.angle)*t,w=(rx*dy-ry*dx)*sp*b.mass/b.inertia*.3;
  Body.setVelocity(b,{x:dx*sp,y:dy*sp});Body.setAngularVelocity(b,Math.max(-.35,Math.min(.35,w)));
  G.st='sim';G.simT=0;G.sT=0;acc=0;drag=null;snd(260+pw*300,.12,'square',.12,90);hud()}
-function simCheck(dt){G.simT+=dt;let mv=0;
- for(const p of G.pl){if(!p.alive||p.fell)continue;const b=p.body,q=b.position;
-  if(!onB(q.x,q.y)){p.fell=1;p.ft=performance.now();b.collisionFilter.mask=0;snd(520,.5,'triangle',.18,110)}
-  else if(b.speed>.12||Math.abs(b.angularSpeed)>.004)mv=1}
- G.sT=mv?0:G.sT+dt;if(G.sT>350||G.simT>15000)resolve()}
+function simCheck(dt){G.simT+=dt;let mv=0;const now=performance.now();
+ for(const p of G.pl){if(!p.alive)continue;const b=p.body,q=b.position;
+  if(!p.fell&&!onB(q.x,q.y)){p.fell=1;p.ft=now;const dx=q.x-(B.x+B.w/2),dy=q.y-(B.y+B.h/2),len=Math.hypot(dx,dy)||1;p.fdX=dx/len;p.fdY=dy/len;b.collisionFilter.mask=0;b.collisionFilter.category=0;snd(520,.5,'triangle',.18,110)}
+  if(p.fell){if(now-p.ft<700)mv=1;continue}
+  if(b.speed>.12||Math.abs(b.angularSpeed)>.004)mv=1}
+ G.sT=mv?0:G.sT+dt;if((G.sT>350&&!G.pl.some(p=>p.alive&&p.fell&&now-p.ft<700))||G.simT>15000)resolve()}
 function resolve(){
  for(const p of G.pl)if(p.alive){Body.setVelocity(p.body,{x:0,y:0});Body.setAngularVelocity(p.body,0)}
  const cur=G.pl[G.t],out=G.pl.filter(p=>p.alive&&p.fell),left=G.pl.filter(p=>p.alive&&!p.fell);
@@ -286,7 +287,7 @@ function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.he
  const now=performance.now(),cur=G.pl[G.t];
  if(G.st==='aim'){const b=cur.body.position;const r0=S.rm?34:34+3*Math.sin(t/200),ga=cx.createRadialGradient(b.x,b.y,8,b.x,b.y,r0+14);ga.addColorStop(0,PC[cur.i]+'55');ga.addColorStop(1,PC[cur.i]+'00');cx.fillStyle=ga;cx.beginPath();cx.arc(b.x,b.y,r0+14,0,6.283);cx.fill();cx.strokeStyle=PC[cur.i];cx.lineWidth=2.5;cx.globalAlpha=.85;cx.beginPath();cx.arc(b.x,b.y,r0,0,6.283);cx.stroke();cx.globalAlpha=1}
  for(const p of G.pl){const b=p.body;if(!p.fell){if(p.alive){if(!S.rm&&b.speed>4)for(const m of[4,2])pen(cx,p,b.position.x-b.velocity.x*m,b.position.y-b.velocity.y*m,b.angle,1,.1);pen(cx,p,b.position.x,b.position.y,b.angle,1,1)}}
-  else{const q=(now-p.ft)/700;if(q<1)pen(cx,p,b.position.x,b.position.y,b.angle+(S.rm?0:q*1.5),S.rm?1:1-.4*q,1-q,5+q*10)}}
+  else{const q=clamp((now-p.ft)/700,0,1),dx=p.fdX||0,dy=p.fdY||1;pen(cx,p,b.position.x+dx*q*52,b.position.y+dy*q*52+q*q*34,b.angle+(S.rm?0:q*2.8),S.rm?1:1-.45*q,1-q,5+q*12)}}
  let pwv=0;
  if(drag&&G.st==='aim'){const b=cpOf(cur.body,drag.t),vx=b.x-drag.x,vy=b.y-drag.y,l=Math.hypot(vx,vy);cx.fillStyle='#fff';cx.beginPath();cx.arc(b.x,b.y,4,0,6.3);cx.fill();
   if(l>=18){const pw=Math.min(l,MAXD)/MAXD,a=Math.atan2(vy,vx),len=40+pw*140,col=`hsl(${120-120*pw},85%,55%)`;pwv=pw;
