@@ -327,6 +327,8 @@ PENS.splice(0,PENS.length,
  {n:'Blue ballpoint',k:'click',c:'#1e40af',g:'#14171d',ink:'#1e40af'},{n:'Black ballpoint',k:'click',c:'#2b2d33',g:'#0b0b0d',ink:'#111'},{n:'Red ballpoint',k:'click',c:'#c62828',g:'#17171a',ink:'#dc2626'},
  {n:'Clear hex pen',k:'stick',c:'rgba(205,228,255,.34)',cap:'#2563eb',ink:'#2563eb'},{n:'Neon green',k:'click',c:'#6fbf0a',g:'#2a313c',ink:'#65a30d'},{n:'Orange student',k:'stick',c:'rgba(255,214,170,.36)',cap:'#f97316',ink:'#ea580c'});
 window.PenGame={Assets,PENS,PC,start,Q};
+// Restore custom pen skins uploaded in Settings on this browser.
+try{const savedPens=JSON.parse(localStorage.getItem('pg.customPens')||'[]');if(Array.isArray(savedPens))savedPens.forEach(p=>{if(p&&p.src)Assets.addPen(p)})}catch(e){}
 {const m=new URLSearchParams(location.search).get('assets');if(m)fetch(m).then(r=>r.json()).then(j=>Assets.loadManifest(j)).catch(()=>toast('Could not load asset manifest'))}
 /* ---- procedural pen sprite (drawn once per pen+player at 4x, then blitted) ---- */
 function drawPen(g,d,pc){
@@ -411,8 +413,8 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value=${k} ${k==v?'select
  <h3>Custom assets (this session)</h3><label>Bench image <input type=file accept="image/*" data-f=bench></label><label>Add pen skin <input type=file accept="image/*" data-f=pen></label>
  <p class=mu>Pen skins: transparent PNG with the pen pointing right. Strength and surface apply from the next match.</p><div class=g2><button data-a=ares>Reset assets</button><button class=pr data-a=menu>Done</button></div>`)}
 document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.dataset.f;if(!f||!el.files||!el.files[0])return;const file=el.files[0],fr=new FileReader();
- fr.onload=async()=>{if(f==='bench'){await Assets.setBench(fr.result);toast('Bench image applied')}else{Assets.addPen({n:file.name.replace(/\.\w+$/,'').slice(0,18),src:fr.result});toast('Pen added \u2014 pick it in match setup')}};fr.readAsDataURL(file)});
-document.addEventListener('click',e=>{if(e.target.closest('[data-a=ares]')){Assets.reset();toast('Assets reset')}});
+ fr.onload=async()=>{if(f==='bench'){await Assets.setBench(fr.result);toast('Bench image applied')}else{const penData={n:file.name.replace(/\.\w+$/,'').slice(0,18)||'Custom pen',src:fr.result,len:84,band:-10};Assets.addPen(penData);try{const customPens=PENS.slice(6).map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}));localStorage.setItem('pg.customPens',JSON.stringify(customPens))}catch(err){toast('Pen added for this session, but browser storage is full')}toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
+document.addEventListener('click',e=>{if(e.target.closest('[data-a=ares]')){Assets.reset();try{localStorage.removeItem('pg.customPens')}catch(err){}toast('Custom assets reset')}});
 rs();requestAnimationFrame(loop);menu();
 })();
 </script></body></html>
