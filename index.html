@@ -7,10 +7,10 @@
 :root{--bg:#0b0b0d;--sf:#141418;--sf2:#1b1b21;--ln:#2b2b32;--tx:#f5f5f7;--mu:#a3a3ad;--ac:#dc3545;--ac2:#ff6577;--ok:#22c55e;--warn:#eab308;
 --ff:"Hind Siliguri",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--fd:"Permanent Marker","Hind Siliguri",system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-body{display:flex;flex-direction:column;gap:8px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--bg);color:var(--tx);font:16px/1.45 var(--ff);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+html,body{height:100%;margin:0;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+body{display:flex;flex-direction:column;padding:0;background:var(--bg);color:var(--tx);font:16px/1.45 var(--ff);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 #stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-#c{display:block;touch-action:none;border-radius:14px;max-width:100%}
+#c{display:block;touch-action:none;max-width:100%}
 button,select,input{font:inherit;color:var(--tx);background:var(--sf2);border:1px solid var(--ln);border-radius:10px;padding:9px 14px}
 button{cursor:pointer;transition:transform .12s,filter .12s}
 button:hover{filter:brightness(1.15)}button:active{transform:scale(.97)}
@@ -90,7 +90,7 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 .section-head h3,.editor-title h3{font-size:17px;margin:0;text-transform:none;letter-spacing:-.01em;color:var(--tx)}
 .player-count{display:flex;gap:10px;align-items:center}
 .player-count>span,.gallery-head>span,.rule>span{font-size:10px;letter-spacing:.13em;color:var(--mu);font-weight:700}
-.player-count .seg button{min-width:40px;padding:6px 0;font-size:14px}
+.player-count .seg button{min-width:30px;padding:6px 0;font-size:12px}
 .roster-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .roster-card{display:flex;flex-direction:column;text-align:left;gap:6px;padding:12px;background:linear-gradient(155deg,#1a1a20,#141418);border:1px solid #303038;border-radius:14px;min-width:0}
 .roster-card.active{border-color:var(--player-color);box-shadow:inset 0 0 25px color-mix(in srgb,var(--player-color) 10%,transparent)}
@@ -112,7 +112,7 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 .editor-badge{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--player-color);border:1px solid var(--player-color);padding:6px 8px;border-radius:6px}
 .player-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:19px}
 .player-fields label{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:0;color:#bdbdc7;font-size:11px;font-weight:600}
-.player-fields input,.player-fields select{width:100%;min-width:0;background:#19191f;padding:10px 12px;font-size:16px}
+.player-fields input,.player-fields select{width:100%;min-width:0;background:#19191f;padding:10px 12px;font-size:13px}
 .gallery-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.gallery-head h4{font-size:13px;margin:0}
 .pen-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
 .pen-option{min-width:0;text-align:left;display:flex;flex-direction:column;gap:7px;padding:8px;border:1px solid #303038;background:#17171c;border-radius:11px}
@@ -131,74 +131,31 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
 @media(pointer:coarse){button,select,input[type=text],.seg button{min-height:44px}}
 .rm *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
-
-/* Android-first viewport and comfortable touch targets */
-:root{--vh:100dvh}
-html,body{width:100%;height:100%;height:100dvh;min-height:0}
-body{gap:clamp(4px,1vh,8px);padding-top:max(4px,env(safe-area-inset-top,0px));padding-bottom:max(4px,env(safe-area-inset-bottom,0px));padding-left:max(5px,env(safe-area-inset-left,0px));padding-right:max(5px,env(safe-area-inset-right,0px)}
-#top{flex:none;width:100%;gap:5px 7px;padding:5px 7px;border-radius:12px}
-#turn{gap:6px;padding:5px 9px;font-size:clamp(12px,1.8vh,15px)}
-#turn .dot{width:10px;height:10px}
-#order{gap:clamp(4px,1vw,10px);align-items:center}
-.chip{gap:4px;font-size:clamp(10px,1.5vh,12px)}
-.chip b{width:clamp(25px,4.2vh,30px);height:clamp(25px,4.2vh,30px);font-size:12px}
-#top button{width:clamp(38px,5.7vh,44px);height:clamp(38px,5.7vh,44px);flex:none}
-#stage{flex:1 1 0%;width:100%;min-width:0;min-height:0;overflow:hidden;touch-action:none}
-#c{max-width:none;max-height:none;border-radius:clamp(5px,1vw,14px)}
-#scr{padding-top:max(8px,env(safe-area-inset-top,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px));padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
-.p{max-height:100%;overscroll-behavior:contain}
-button,select,input{font-size:16px}
-button{min-height:44px}
-@media(max-width:620px){
- body{gap:4px}
- #top{gap:4px 5px;padding:4px 5px}
- #turn{max-width:45%;overflow:hidden}
- #turn>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- #order{gap:5px;flex:1 1 auto}
- .chip em{display:none}
- #ser{font-size:10px}
- #pwr{width:70px}
- .p{padding:14px}
-}
-@media(max-height:560px){
- body{gap:3px;padding-top:max(2px,env(safe-area-inset-top,0px));padding-bottom:max(2px,env(safe-area-inset-bottom,0px))}
- #top{padding:2px 5px}
- #turn{padding:2px 7px}
- #turn .dot{width:8px;height:8px}
- #top button{width:36px;height:36px}
- #pwr{display:none}
-}
-@media(orientation:landscape) and (max-height:500px){
- body{padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
- #top{flex-wrap:nowrap}
- #order{flex-wrap:nowrap}
- #stage{flex:1}
-}
-@media(pointer:coarse){
- button,select,input[type=text],.seg button{min-height:44px}
- #c{touch-action:none}
-}
-
-/* True fullscreen gameplay: remove the entire HUD and let the table own the viewport. */
-html:fullscreen,html:fullscreen body{width:100vw;height:100%;height:100dvh;min-height:0;margin:0;overflow:hidden}
-html:fullscreen body{display:block;padding:0!important;gap:0!important}
-html:fullscreen #top{display:none!important}
-html:fullscreen #stage{position:fixed;inset:0;width:100vw;height:100%;height:100dvh;min-width:0;min-height:0;margin:0;padding:0;overflow:hidden;flex:none}
-html:fullscreen #c{max-width:none;max-height:none;border-radius:0}
-html:fullscreen #toast{display:none!important}
+/* Full-screen play: the bench fills the whole screen, the scoreboard bar is hidden unless turned on in Settings. */
+html body{padding:0;gap:0}
+#stage{position:fixed;flex:none;inset:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#top{position:fixed;z-index:4;top:calc(6px + env(safe-area-inset-top,0px));left:calc(6px + env(safe-area-inset-left,0px));right:calc(6px + env(safe-area-inset-right,0px));background:rgba(18,18,22,.8);pointer-events:none}
+#top button{pointer-events:auto}
+#fpz{position:fixed;z-index:4;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));width:40px;height:40px;min-height:0;padding:0;border-radius:50%;display:none;place-items:center;background:rgba(16,16,20,.55);border-color:rgba(255,255,255,.18);opacity:.5}
+#fpz:hover,#fpz:active{opacity:1}
+#clk{position:fixed;z-index:4;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(16,16,20,.75)}
+body.hudon #clk{top:calc(72px + env(safe-area-inset-top,0px))}
+body.play #toast{top:calc(54px + env(safe-area-inset-top,0px))}
+body.hudon #toast{top:calc(76px + env(safe-area-inset-top,0px))}
 </style>
 
 <div id="top">
  <div id="turn"></div>
  <div id="order"></div>
  <div id="ser" hidden></div>
- <div id="clk" hidden title="Shot clock"></div>
  <div id="pwr" title="Flick power"><div id="pwf"></div></div>
  <button data-a="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
  <button data-a="rr" aria-label="Restart round"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg></button>
  <button data-a="menu" aria-label="Main menu"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>
 </div>
 <div id="stage"><canvas id="c" aria-label="Pen Game bench"></canvas></div>
+<div id="clk" hidden title="Shot clock"></div>
+<button id="fpz" data-a="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
 <div id="scr"></div><div id="toast" role="status"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script>
@@ -210,7 +167,10 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const ord=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th');
 
 /* ---------- constants ---------- */
-const W=960,H=600,B={x:40,y:40,w:880,h:520,r:26},CX=B.x+B.w/2,CY=B.y+B.h/2,PL=84,PW=11,MAXD=150,VMAX=22,Q=4;
+/* The world is 600 high and as wide as the screen needs (860-1320). V is the visible window: just the bench plus a thin edge of floor, so the table fills the screen.
+   PS scales the pens: bigger and thicker, so they do not look like thin sticks on a phone. */
+const H=600,VM=28,PS=1.3,PL0=84,PL=Math.round(PL0*PS),PW=Math.round(11*PS),HL=37*PS,TIP=40*PS,MAXD=150,VMAX=22,Q=4;let W=960;
+const B={x:40,y:40,w:880,h:520,r:26};let CX=B.x+B.w/2;const CY=B.y+B.h/2,V={x:VM,y:VM,w:W-2*VM,h:H-2*VM};
 const PC=['#3b82f6','#f59e0b','#22c55e','#a855f7','#06b6d4','#ec4899'];
 const PENS=[
  {n:'Blue ballpoint',k:'click',c:'#1e40af',g:'#14171d',ink:'#1e40af'},
@@ -220,14 +180,18 @@ const PENS=[
  {n:'Neon green',k:'click',c:'#6fbf0a',g:'#2a313c',ink:'#65a30d'},
  {n:'Orange student',k:'stick',c:'rgba(255,214,170,.36)',cap:'#f97316',ink:'#ea580c'}];
 const BUILTIN=PENS.length;
-const PHY={classic:.04,slick:.026,grippy:.06};
+/* Surfaces: k = air drag per frame, m = sliding friction (constant slow-down, like a real pen on wood). */
+const PHY={classic:{k:.012,m:.36},slick:{k:.008,m:.24},grippy:{k:.018,m:.5}};
+const ZG=.5,ZC=4; /* z gravity (units/frame^2); above ZC a pen clears others */
+const travel=(v,k,m)=>{let d=0;while(v>0&&d<4000){d+=v;v=v*(1-k)-m}return d};
+const speedFor=(d,k,m,vm)=>{let lo=0,hi=vm;for(let i=0;i<18;i++){const mid=(lo+hi)/2;travel(mid,k,m)<d?lo=mid:hi=mid}return hi};
 const OBS={eraser:{w:58,h:26,n:'the eraser'},sharpener:{w:36,h:24,n:'the sharpener'},glue:{r:17,n:'the glue stick'}};
 const SERIES=[[1,'Single'],[3,'Best of 3'],[5,'Best of 5']],CLOCKS=[[0,'Off'],[15,'15 s'],[30,'30 s']],CLUTTER=[[0,'Clear'],[1,'Eraser'],[2,'Cluttered']];
 
 /* ---------- persistence ---------- */
 const ld=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem(k)))}catch(e){return d}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let S=ld('pg.s',{snd:1,vol:.6,rm:matchMedia('(prefers-reduced-motion:reduce)').matches,pw:1,acc:0,phy:'classic',ink:1,vib:1,hint:0});
+let S=ld('pg.s',{snd:1,vol:.6,rm:matchMedia('(prefers-reduced-motion:reduce)').matches,pw:1,asst:1,acc:0,phy:'classic',ink:1,vib:1});
 let ST=ld('pg.st',{p:0,w:0,e:0,rs:0,pens:{},st:0,bs:0,sh:0,ht:0,sp:0,sw:0,rec:[]});
 if(!ST.pens||typeof ST.pens!=='object')ST.pens={};if(!Array.isArray(ST.rec))ST.rec=[];
 for(const k of['p','w','e','rs','st','bs','sh','ht','sp','sw'])if(!isFinite(ST[k]))ST[k]=0;
@@ -236,10 +200,8 @@ document.body.classList.toggle('rm',!!S.rm);
 /* ---------- audio ---------- */
 let AC;const snd=(f,d,ty='sine',v=.2,f2)=>{if(!S.snd||!S.vol)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=ty;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(Math.max(.0002,v*S.vol),t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}};
 
-let vibT=0;const vib=p=>{try{const t=Date.now();if(S.vib&&typeof navigator!=='undefined'&&navigator.vibrate&&t-vibT>60){vibT=t;navigator.vibrate(p)}}catch(e){}};
-let wakeLk=null;
-const wake=()=>{try{if(typeof navigator!=='undefined'&&navigator.wakeLock&&!wakeLk&&!document.hidden)navigator.wakeLock.request('screen').then(l=>{wakeLk=l;l.addEventListener('release',()=>{wakeLk=null})}).catch(()=>{})}catch(e){}};
-function touchHint(){try{if(S.hint||!matchMedia('(pointer:coarse)').matches)return;S.hint=1;sv('pg.s',S);setTimeout(()=>toast('Drag back from your pen, then let go to flick',3400),1500)}catch(e){}}
+const vib=p=>{try{if(S.vib&&typeof navigator!=='undefined'&&navigator.vibrate)navigator.vibrate(p)}catch(e){}};
+const wake=()=>{try{if(typeof navigator!=='undefined'&&navigator.wakeLock)navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
 /* ---------- assets (EXTEND HERE) ----------
  PEN SKIN (image): Assets.addPen({n:'Name', src:'path-or-dataURL.png', len:84, band:-10})  transparent PNG, pen pointing right.
  PEN (procedural): Assets.addPen({n, k:'click'|'stick', c:barrel, g:grip, cap:capColour, ink:inkColour})
@@ -261,16 +223,16 @@ const ptSeg=(px,py,ax,ay,bx,by)=>{const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy,t=l?clam
 const segX=(x1,y1,x2,y2,x3,y3,x4,y4)=>{const d=(x2-x1)*(y4-y3)-(y2-y1)*(x4-x3);if(!d)return false;const t=((x3-x1)*(y4-y3)-(y3-y1)*(x4-x3))/d,u=((x3-x1)*(y2-y1)-(y3-y1)*(x2-x1))/d;return t>=0&&t<=1&&u>=0&&u<=1};
 const segD=(x1,y1,x2,y2,x3,y3,x4,y4)=>segX(x1,y1,x2,y2,x3,y3,x4,y4)?0:Math.min(ptSeg(x1,y1,x3,y3,x4,y4),ptSeg(x2,y2,x3,y3,x4,y4),ptSeg(x3,y3,x1,y1,x2,y2),ptSeg(x4,y4,x1,y1,x2,y2));
 function onB(x,y){const r=B.r,dx=Math.max(B.x+r-x,0,x-(B.x+B.w-r)),dy=Math.max(B.y+r-y,0,y-(B.y+B.h-r));return x>=B.x&&x<=B.x+B.w&&y>=B.y&&y<=B.y+B.h&&dx*dx+dy*dy<=r*r}
-function hitObs(o,x,y,ca,sa){for(const t of[-37,-18,0,18,37]){const px=x+ca*t,py=y+sa*t;
- if(o.r){if(Math.hypot(px-o.x,py-o.y)<o.r+5.5)return true}
- else{const dx=px-o.x,dy=py-o.y,lx=dx*Math.cos(o.a)+dy*Math.sin(o.a),ly=-dx*Math.sin(o.a)+dy*Math.cos(o.a);if(Math.abs(lx)<o.w/2+5&&Math.abs(ly)<o.h/2+5)return true}}return false}
+function hitObs(o,x,y,ca,sa){for(const t of[-HL,-HL/2,0,HL/2,HL]){const px=x+ca*t,py=y+sa*t;
+ if(o.r){if(Math.hypot(px-o.x,py-o.y)<o.r+PW/2)return true}
+ else{const dx=px-o.x,dy=py-o.y,lx=dx*Math.cos(o.a)+dy*Math.sin(o.a),ly=-dx*Math.sin(o.a)+dy*Math.cos(o.a);if(Math.abs(lx)<o.w/2+PW/2&&Math.abs(ly)<o.h/2+PW/2)return true}}return false}
 /* Walks the pen straight along `ang` and reports what it meets first. Spin is ignored, so this is a close estimate. */
 function sweep(p,ang,maxD){const b=p.body,dx=Math.cos(ang),dy=Math.sin(ang),ca=Math.cos(b.angle),sa=Math.sin(b.angle);
- const F=G.pl.filter(q=>q!==p&&q.alive&&!q.fell).map(q=>{const a=q.body.angle,c=Math.cos(a)*37,s=Math.sin(a)*37,x=q.body.position.x,y=q.body.position.y;return{q,ax:x-c,ay:y-s,bx:x+c,by:y+s}});
+ const F=G.pl.filter(q=>q!==p&&q.alive&&!q.fell).map(q=>{const a=q.body.angle,c=Math.cos(a)*HL,s=Math.sin(a)*HL,x=q.body.position.x,y=q.body.position.y;return{q,ax:x-c,ay:y-s,bx:x+c,by:y+s}});
  let px=b.position.x,py=b.position.y;
  for(let d=3;d<=maxD;d+=3){const x=b.position.x+dx*d,y=b.position.y+dy*d;
   if(!onB(x,y))return{k:'edge',x,y,d};
-  for(const f of F)if(segD(x-ca*37,y-sa*37,x+ca*37,y+sa*37,f.ax,f.ay,f.bx,f.by)<PW)return{k:'pen',q:f.q,x:px,y:py,d};
+  for(const f of F)if(segD(x-ca*HL,y-sa*HL,x+ca*HL,y+sa*HL,f.ax,f.ay,f.bx,f.by)<PW)return{k:'pen',q:f.q,x:px,y:py,d};
   for(const o of G.obs)if(hitObs(o,x,y,ca,sa))return{k:'obs',o,x:px,y:py,d};
   px=x;py=y}
  return{k:'none',x:px,y:py,d:maxD}}
@@ -278,24 +240,30 @@ function sweep(p,ang,maxD){const b=p.body,dx=Math.cos(ang),dy=Math.sin(ang),ca=M
 /* ---------- game state ---------- */
 const eng=Engine.create({gravity:{x:0,y:0,scale:0}});
 let G=null,M=null,acc=0,last=0,shake=0,parts=[],drag=null,tmr=0,paused=false,topOn=false;
-const ink=document.createElement('canvas');ink.width=W*1.25;ink.height=H*1.25;const ig=ink.getContext('2d');ig.scale(1.25,1.25);ig.lineCap='round';
-let inkUsed=false;const inkClear=()=>{ig.clearRect(0,0,W,H);inkUsed=false};
+const ink=document.createElement('canvas');ink.width=W*1.5;ink.height=H*1.5;const ig=ink.getContext('2d');ig.scale(1.5,1.5);ig.lineCap='round';
+const inkClear=()=>ig.clearRect(0,0,W,H);
+let benchT=0,benchTok=0;const queueBench=ms=>{clearTimeout(benchT);benchT=setTimeout(makeBench,ms)};
+/* Match the table to the screen shape so it fills a wide phone edge to edge. Not changed mid-round. */
+function fitWorld(force){const fresh=!!G&&G.st==='aim'&&!paused&&G.pl.every(p=>!p.sh);if(!force&&G&&!fresh)return;const r=$('#stage').getBoundingClientRect();if(!r.width||!r.height)return;const a=Math.max(r.width,r.height)/Math.min(r.width,r.height),nw=clamp(Math.round(a*(H-2*VM)/10)*10+2*VM,860,1320);if(Math.abs(nw-W)<10)return;
+ W=nw;B.w=W-80;CX=W/2;V.w=W-2*VM;ink.width=Math.round(W*1.5);ink.height=Math.round(H*1.5);ig.setTransform(1.5,0,0,1.5,0,0);ig.lineCap='round';queueBench(150);if(fresh&&!force)round()}
+function goFS(){try{if(S.afs===0||!matchMedia('(pointer:coarse)').matches||document.fullscreenElement||!document.fullscreenEnabled)return;const p=document.documentElement.requestFullscreen({navigationUI:'hide'});if(p&&p.then)p.then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){}}).catch(()=>{})}catch(e){}}
 
 function normCfg(c){c=c||{};const pick=(list,v)=>list.some(x=>x[0]===+v)?+v:list[0][0];return{...c,series:pick(SERIES,c.series),clock:pick(CLOCKS,c.clock),clutter:pick(CLUTTER,c.clutter),pl:(c.pl||[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))).map((p,i)=>({name:String(p.name||'Player').slice(0,14),ai:clamp(+p.ai||0,0,3),pen:+p.pen<PENS.length&&+p.pen>=0?+p.pen:i%BUILTIN}))}}
-function begin(cfg){wake();M={cfg,scores:cfg.pl.map(()=>0),round:1,need:Math.ceil(cfg.series/2),first:Math.floor(Math.random()*cfg.pl.length)};round();touchHint()}
+function begin(cfg){wake();M={cfg,scores:cfg.pl.map(()=>0),round:1,need:Math.ceil(cfg.series/2),first:Math.floor(Math.random()*cfg.pl.length)};round()}
 function makeObs(lv){const kinds=lv===1?['eraser']:lv===2?['eraser','sharpener','glue']:[],out=[];
- for(const k of kinds){const D=OBS[k];let x,y,t=0;do{x=CX+(Math.random()-.5)*280;y=CY+(Math.random()-.5)*110;t++}while(t<40&&out.some(o=>Math.hypot(o.x-x,o.y-y)<100));
+ for(const k of kinds){const D=OBS[k];let x,y,t=0;do{x=CX+(Math.random()-.5)*B.w*.32;y=CY+(Math.random()-.5)*110;t++}while(t<40&&out.some(o=>Math.hypot(o.x-x,o.y-y)<100));
   const a=Math.random()*Math.PI,o={k,x,y,a,w:D.w||0,h:D.h||0,r:D.r||0,n:D.n};
   o.body=D.r?Bodies.circle(x,y,D.r,{isStatic:true,restitution:.6,friction:0,label:'obs'}):Bodies.rectangle(x,y,D.w,D.h,{isStatic:true,angle:a,chamfer:{radius:4},restitution:.6,friction:0,label:'obs'});
   o.sp=obsSprite(o);out.push(o)}
  return out}
-function round(){const cfg=M.cfg;clearTimeout(tmr);Composite.clear(eng.world,false);if(Engine.clear)Engine.clear(eng);parts=[];drag=null;paused=false;acc=0;inkClear();
- const n=cfg.pl.length,k=PHY[S.phy]||.04,off=Math.random()*6.28,obs=makeObs(cfg.clutter|0);
- const pl=cfg.pl.map((c,i)=>{const a=off+Math.PI*2*i/n,x=CX+Math.cos(a)*(250+Math.random()*40),y=CY+Math.sin(a)*(130+Math.random()*30);
+function round(){fitWorld(1);const cfg=M.cfg;clearTimeout(tmr);Composite.clear(eng.world,false);if(Engine.clear)Engine.clear(eng);parts=[];drag=null;paused=false;acc=0;inkClear();
+ const n=cfg.pl.length,ph=PHY[S.phy]||PHY.classic,k=ph.k,off=Math.random()*6.28,obs=makeObs(cfg.clutter|0);
+ const pl=cfg.pl.map((c,i)=>{const a=off+Math.PI*2*i/n,x=CX+Math.cos(a)*(B.w*.284+Math.random()*40),y=CY+Math.sin(a)*(B.h*.25+Math.random()*30);
   const body=Bodies.rectangle(x,y,PL,PW,{label:'pen',chamfer:{radius:5},density:.002,frictionAir:k,friction:.25,frictionStatic:0,restitution:.55,angle:Math.random()*6.28});
-  return{i,name:c.name,ai:+c.ai,pen:+c.pen,alive:1,fell:0,rank:0,el:0,sh:0,ht:0,body,lt:null}});
+  return{i,name:c.name,ai:+c.ai,pen:+c.pen,alive:1,fell:0,rank:0,el:0,sh:0,ht:0,body,lt:null,z:0,vz:0,pt:0,pw:0,rb:0,fl:0,m0:body.collisionFilter.mask}});
+ pl.forEach(p=>{p.body.pg=p});
  Composite.add(eng.world,[...obs.map(o=>o.body),...pl.map(p=>p.body)]);
- G={id:Math.random(),cfg,pl,obs,t:(M.first+M.round-1)%n,st:'aim',k,simT:0,sT:0,win:null,clk:0,cs:-1,hit:0};
+ G={id:Math.random(),cfg,pl,obs,t:(M.first+M.round-1)%n,st:'aim',k,m:ph.m,simT:0,sT:0,win:null,clk:0,cs:-1,hit:0};
  turnStart();hud();toast(cfg.series>1?`Round ${M.round} · ${pl[G.t].name} starts`:pl[G.t].name+'’s turn');sched()}
 function turnStart(){G.clk=G.cfg.clock&&!G.pl[G.t].ai?G.cfg.clock*1000:0;G.cs=-1}
 function nextTurn(){do G.t=(G.t+1)%G.pl.length;while(!G.pl[G.t].alive);G.st='aim';turnStart();hud();sched()}
@@ -303,7 +271,8 @@ function timeUp(){const p=G.pl[G.t];drag=null;G.clk=0;toast(p.name+' ran out of 
 
 function clockUI(){const e=$('#clk'),on=G&&G.st==='aim'&&G.cfg.clock&&!G.pl[G.t].ai;e.hidden=!on;if(on){e.textContent=Math.max(0,Math.ceil(G.clk/1000));e.classList.toggle('low',G.clk<=5000)}}
 const ini=n=>(String(n).trim()[0]||'?').toUpperCase();
-function hud(){const g=G,on=!!g;if(on!==topOn){topOn=on;$('#top').style.display=on?'flex':'none';rs()}if(!g)return;
+function syncHud(){const on=topOn&&!!S.hud;$('#top').style.display=on?'flex':'none';$('#fpz').style.display=topOn&&!on?'grid':'none';document.body.classList.toggle('hudon',on)}
+function hud(){const g=G,on=!!g;if(on!==topOn){topOn=on;document.body.classList.toggle('play',on);syncHud()}if(!g)return;
  const c=g.pl[g.t],ser=$('#ser');
  $('#turn').innerHTML=g.st==='over'?'Round over':`<span class="dot" style="color:${PC[c.i]}"></span><span>${esc(c.name)}${c.ai?' · AI':''}</span><small>${g.st==='aim'?(c.ai?'thinking…':'drag back, release'):'in motion…'}</small>`;
  ser.hidden=M.cfg.series<2;if(!ser.hidden)ser.textContent=`Best of ${M.cfg.series} · Round ${M.round}`;
@@ -316,21 +285,41 @@ function flick(ang,pw,t=0){const p=G.pl[G.t],b=p.body;if(S.acc)ang+=(Math.random
  const sp=3+(VMAX*S.pw-3)*Math.pow(pw,1.3);
  const dx=Math.cos(ang),dy=Math.sin(ang),rx=Math.cos(b.angle)*t,ry=Math.sin(b.angle)*t,w=(rx*dy-ry*dx)*sp*b.mass/b.inertia*.3;
  Body.setVelocity(b,{x:dx*sp,y:dy*sp});Body.setAngularVelocity(b,clamp(w,-.35,.35));
+ if(S.hop!==0&&pw>.7){const e=Math.min(1,Math.abs(t)/(PL/2));if(Math.random()<.25+.5*e)hop(p,(pw-.65)*5.5*(.5+.5*e)*(.5+Math.random()*.6),t<0?-1:1)}
  p.sh++;G.hit=0;p.lt=null;G.st='sim';G.simT=0;G.sT=0;acc=0;drag=null;snd(260+pw*300,.12,'square',.12,90);vib(12);hud()}
+/* ---- z axis: hops, flight, landing, sliding friction ---- */
+function hop(p,vz,spin){if(S.hop===0||p.z>0||p.fell||!p.alive||vz<1.1)return;p.vz=Math.min(6,vz);p.z=.01;p.pw=spin*vz*.07;p.pt=0;p.fl=0}
+function overP(p){const b=p.body,ca=Math.cos(b.angle)*HL,sa=Math.sin(b.angle)*HL,x=b.position.x,y=b.position.y;
+ for(const q of G.pl){if(q===p||!q.alive||q.fell||q.z>=ZC)continue;const c=Math.cos(q.body.angle)*HL,s=Math.sin(q.body.angle)*HL,qx=q.body.position.x,qy=q.body.position.y;
+  if(segD(x-ca,y-sa,x+ca,y+sa,qx-c,qy-s,qx+c,qy+s)<PW*.95)return 1}
+ for(const o of G.obs)if(hitObs(o,x,y,Math.cos(b.angle),Math.sin(b.angle)))return 1;return 0}
+function zStep(u){if(!G)return;for(const p of G.pl){if(!p.alive||p.fell)continue;const b=p.body;
+  if(p.z>0){p.vz-=ZG*u;p.z+=p.vz*u;p.pt+=p.pw*u;
+   if(p.z>=ZC){b.collisionFilter.mask=0;p.fl=1}
+   else if(p.fl&&p.vz<0&&p.z>0&&!overP(p)){b.collisionFilter.mask=p.m0;p.fl=0}
+   if(p.z<=0){const vi=-p.vz;p.z=0;
+    if(p.fl&&overP(p)&&p.rb<3){p.z=.01;p.vz=1.1;p.rb++;continue}
+    if(vi>2.6){p.z=.01;p.vz=vi*.3;p.pw*=.4;Body.setVelocity(b,{x:b.velocity.x*.9,y:b.velocity.y*.9})}
+    else{p.vz=0;p.pt=0;p.pw=0;p.rb=0;p.fl=0;b.collisionFilter.mask=p.m0}
+    if(vi>1.3){Body.setVelocity(b,{x:b.velocity.x*.88,y:b.velocity.y*.88});snd(110+vi*25,.07,'triangle',Math.min(.25,vi/14));if(!S.rm){shake=Math.max(shake,Math.min(4,vi));for(let i=0;i<6;i++)parts.push({x:b.position.x,y:b.position.y,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,l:.5,c:'#e8d3b0'})}}}
+  }else{
+   const vx=b.velocity.x,vy=b.velocity.y,sp=Math.hypot(vx,vy);
+   if(sp>0){const ns=Math.max(0,sp-G.m*u);if(ns<.05)Body.setVelocity(b,{x:0,y:0});else Body.setVelocity(b,{x:vx/sp*ns,y:vy/sp*ns})}
+   const w=b.angularVelocity;if(w){const nw=Math.max(0,Math.abs(w)-G.m*.018*u);Body.setAngularVelocity(b,Math.abs(nw)<.002?0:Math.sign(w)*nw)}}}}
 function simCheck(dt){G.simT+=dt;let mv=0;
  for(const p of G.pl){if(!p.alive||p.fell)continue;const b=p.body,q=b.position;
   if(!onB(q.x,q.y)){p.fell=1;p.ft=performance.now();b.collisionFilter.mask=0;snd(520,.5,'triangle',.18,110);vib([40,30,40])}
-  else if(b.speed>.12||Math.abs(b.angularSpeed)>.004)mv=1}
+  else if(p.z>0||b.speed>.12||Math.abs(b.angularSpeed)>.004)mv=1}
  G.sT=mv?0:G.sT+dt;if(G.sT>350||G.simT>15000)resolve()}
 function resolve(){
- for(const p of G.pl)if(p.alive){Body.setVelocity(p.body,{x:0,y:0});Body.setAngularVelocity(p.body,0)}
+ for(const p of G.pl)if(p.alive){Body.setVelocity(p.body,{x:0,y:0});Body.setAngularVelocity(p.body,0);if(!p.fell){p.z=0;p.vz=0;p.pt=0;p.pw=0;p.fl=0;p.body.collisionFilter.mask=p.m0}}
  const cur=G.pl[G.t],out=G.pl.filter(p=>p.alive&&p.fell),left=G.pl.filter(p=>p.alive&&!p.fell);
  out.forEach(p=>{p.alive=0;p.rank=left.length+1;if(p!==cur)cur.el++;Composite.remove(eng.world,p.body)});
  if(out.length)toast(out.map(p=>p.name).join(' & ')+' eliminated');
  if(left.length<=1)return roundEnd(left[0]||null);
  nextTurn()}
-function inkStep(){if(!S.ink)return;for(const p of G.pl){if(!p.alive||p.fell)continue;const b=p.body,tx=b.position.x+Math.cos(b.angle)*40,ty=b.position.y+Math.sin(b.angle)*40,d=PENS[p.pen]||PENS[0];
- if(p.lt&&b.speed>1.2){ig.globalAlpha=Math.min(.5,.12+b.speed*.02);ig.strokeStyle=d.ink||d.c;ig.lineWidth=1.3;ig.beginPath();ig.moveTo(p.lt[0],p.lt[1]);ig.lineTo(tx,ty);ig.stroke();inkUsed=true}p.lt=[tx,ty]}ig.globalAlpha=1}
+function inkStep(){if(!S.ink)return;for(const p of G.pl){if(!p.alive||p.fell)continue;const b=p.body,tx=b.position.x+Math.cos(b.angle)*TIP,ty=b.position.y+Math.sin(b.angle)*TIP,d=PENS[p.pen]||PENS[0];
+ if(p.lt&&b.speed>1.2&&!p.z){ig.globalAlpha=Math.min(.5,.12+b.speed*.02);ig.strokeStyle=d.ink||d.c;ig.lineWidth=1.3;ig.beginPath();ig.moveTo(p.lt[0],p.lt[1]);ig.lineTo(tx,ty);ig.stroke()}p.lt=[tx,ty]}ig.globalAlpha=1}
 
 /* ---------- round and series results ---------- */
 function roundEnd(w){G.st='over';G.win=w;if(w){w.rank=1;M.scores[w.i]++}
@@ -357,6 +346,10 @@ function roundEnd(w){G.st='over';G.win=w;if(w){w.rank=1;M.scores[w.i]++}
 Events.on(eng,'collisionStart',e=>{for(const pr of e.pairs){const a=pr.bodyA,b=pr.bodyB;
  if(G&&G.st==='sim'&&!G.hit){const cur=G.pl[G.t].body;if((a===cur&&b.label==='pen')||(b===cur&&a.label==='pen')){G.hit=1;G.pl[G.t].ht++}}
  const v=Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y);if(v<1)continue;
+ if(S.hop!==0&&G&&G.st==='sim'&&v>5){const c0=(pr.collision.supports&&pr.collision.supports[0])||a.position;
+  for(const[X,Y]of[[a,b],[b,a]]){const p=X.pg;if(!p||!p.alive||p.fell||p.z>0)continue;
+   const o=Math.min(1,Math.abs(((c0.x-X.position.x)*Math.cos(X.angle)+(c0.y-X.position.y)*Math.sin(X.angle))/(PL/2))),mine=Math.hypot(X.velocity.x,X.velocity.y)/(v+.01),base=Y.pg?1:.6;
+   hop(p,(v-5)*.15*(.3+o)*(.4+Math.random()*.8)*(.6+.4*Math.min(1.5,mine))*base,(Math.random()<.5?-1:1)*(.4+o))}}
  snd(180+Math.min(v,20)*18,.08,'triangle',Math.min(.3,v/40));if(S.rm)continue;if(v>8){shake=Math.min(8,v/2.5);vib(18)}
  const c=(pr.collision.supports&&pr.collision.supports[0])||a.position;for(let i=0;i<Math.min(8,v);i++)parts.push({x:c.x,y:c.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,l:.5,c:'#ffe9c4'})}});
 
@@ -367,7 +360,7 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
  const gs=()=>(Math.random()+Math.random()+Math.random()-1.5)/1.5;let best=null;
  for(const q of foes){const t=q.body.position,dx=t.x-me.x,dy=t.y-me.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
   let ox=t.x-CX,oy=t.y-CY;const ol=Math.hypot(ox,oy)||1;ox/=ol;oy/=ol;
-  const vd=Math.min(vm,Math.max(4,d*G.k*1.2+3+(lv>2?4:1))),ov=Math.max(0,vd/G.k-d)*.25,ang=Math.atan2(dy,dx),sw=sweep(p,ang,d+ov);
+  const vd=Math.min(vm,Math.max(4,speedFor(d,G.k,G.m,vm)+(lv>2?3:.8))),ov=Math.max(0,travel(vd,G.k,G.m)-d)*.25,ang=Math.atan2(dy,dx),sw=sweep(p,ang,d+ov);
   const val=(1-Math.min(edge(t.x,t.y),300)/300)*1.5+(ux*ox+uy*oy)*.8-d/1500-(sw.k==='edge'?3:0)-(sw.k==='obs'?2.5:0);
   if(!best||val>best.val)best={val,vd,ang,q}}
  const pwOf=v=>clamp(Math.pow(Math.max(0,(v-3)/(vm-3)),1/1.3),.1,1);
@@ -380,14 +373,14 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
 /* ---------- input ---------- */
 const cv=$('#c'),cx=cv.getContext('2d');let sc=1,cs=1,rot=false;
 /* Portrait phones: the bench is drawn turned 90 degrees so it fills the screen. Physics is unchanged. */
-function rs(){const r=$('#stage').getBoundingClientRect();rot=r.height>r.width*1.05;const ww=rot?H:W,hh=rot?W:H,s=Math.max(.01,Math.min(r.width/ww,r.height/hh)||1),d=Math.min(devicePixelRatio||1,2);cv.style.width=ww*s+'px';cv.style.height=hh*s+'px';cv.width=Math.round(ww*s*d);cv.height=Math.round(hh*s*d);sc=s*d;cs=s}
-const pt=e=>{const r=cv.getBoundingClientRect(),ux=(e.clientX-r.left)/r.width,uy=(e.clientY-r.top)/r.height;return rot?{x:uy*W,y:H-ux*H}:{x:ux*W,y:uy*H}};
+function rs(){fitWorld();const r=$('#stage').getBoundingClientRect();rot=r.height>r.width*1.05;const ww=rot?V.h:V.w,hh=rot?V.w:V.h,s=Math.min(r.width/ww,r.height/hh)||1,d=Math.min(devicePixelRatio||1,2);cv.style.width=ww*s+'px';cv.style.height=hh*s+'px';cv.width=Math.round(ww*s*d);cv.height=Math.round(hh*s*d);sc=s*d;cs=s}
+const pt=e=>{const r=cv.getBoundingClientRect(),ux=(e.clientX-r.left)/r.width,uy=(e.clientY-r.top)/r.height;return rot?{x:V.x+uy*V.w,y:V.y+V.h-ux*V.h}:{x:V.x+ux*V.w,y:V.y+uy*V.h}};
 const maxD=()=>Math.min(260,Math.max(MAXD,90/cs)),minD=()=>Math.max(18,14/cs);
 const cpOf=(b,t)=>({x:b.position.x+Math.cos(b.angle)*t,y:b.position.y+Math.sin(b.angle)*t});
-cv.addEventListener('pointerdown',e=>{if(!G||paused||drag||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
- const t=clamp((q.x-b.x)*c+(q.y-b.y)*s,-PL/2,PL/2);if(Math.hypot(q.x-(b.x+c*t),q.y-(b.y+s*t))>Math.min(60,Math.max(26,30/cs)))return;drag={x:q.x,y:q.y,t,id:e.pointerId};try{cv.setPointerCapture(e.pointerId)}catch(err){}e.preventDefault()});
-cv.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id){const q=pt(e);drag.x=q.x;drag.y=q.y}});
-cv.addEventListener('pointerup',e=>{if(drag&&e.pointerId!==drag.id)return;if(!drag||!G||G.st!=='aim'){drag=null;return}const c=cpOf(G.pl[G.t].body,drag.t),q=pt(e),vx=c.x-q.x,vy=c.y-q.y,l=Math.hypot(vx,vy);
+cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
+ const t=clamp((q.x-b.x)*c+(q.y-b.y)*s,-PL/2,PL/2);if(Math.hypot(q.x-(b.x+c*t),q.y-(b.y+s*t))>Math.min(90,Math.max(36,44/cs)))return;drag={x:q.x,y:q.y,t};cv.setPointerCapture(e.pointerId);e.preventDefault()});
+cv.addEventListener('pointermove',e=>{if(drag){const q=pt(e);drag.x=q.x;drag.y=q.y}});
+cv.addEventListener('pointerup',e=>{if(!drag||!G||G.st!=='aim'){drag=null;return}const c=cpOf(G.pl[G.t].body,drag.t),q=pt(e),vx=c.x-q.x,vy=c.y-q.y,l=Math.hypot(vx,vy);
  if(l<minD()){drag=null;return}flick(Math.atan2(vy,vx),Math.min(l,maxD())/maxD(),drag.t)});
 cv.addEventListener('pointercancel',()=>{drag=null});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -426,17 +419,12 @@ function drawPen(g,d,pc){
   cone(18,33,4.8,2.1,M2(4.8));g.fillStyle='rgba(0,0,0,.3)';for(let x=19;x<22.6;x+=1.2)g.fillRect(x,-4.5,.35,9);
   cone(33,39.6,2.1,.95,M2(2.1));ball(39.8)}}
 function spriteFor(p){const key=p.pen+':'+p.i,d=PENS[p.pen]||PENS[0];let s=Assets.cache.get(key);if(s)return s;
- const len=d.len||PL,c=document.createElement('canvas');
- if(d.img){const sw=len+8,hh=len*d.img.height/d.img.width,sh=Math.max(PW+12,hh+8);c.width=Math.round(sw*Q);c.height=Math.round(sh*Q);const g=c.getContext('2d');g.scale(Q,Q);g.imageSmoothingQuality='high';g.drawImage(d.img,sw/2-len/2,sh/2-hh/2,len,hh);g.globalCompositeOperation='source-atop';g.fillStyle=PC[p.i];g.fillRect(sw/2+(d.band!=null?d.band:-10),0,3,sh)}
+ const len=d.len||PL0,c=document.createElement('canvas');
+ if(d.img){const sw=len+8,hh=len*d.img.height/d.img.width,sh=Math.max(23,hh+8);c.width=Math.round(sw*Q);c.height=Math.round(sh*Q);const g=c.getContext('2d');g.scale(Q,Q);g.imageSmoothingQuality='high';g.drawImage(d.img,sw/2-len/2,sh/2-hh/2,len,hh);g.globalCompositeOperation='source-atop';g.fillStyle=PC[p.i];g.fillRect(sw/2+(d.band!=null?d.band:-10),0,3,sh)}
  else{c.width=92*Q;c.height=18*Q;const g=c.getContext('2d');g.scale(Q,Q);g.translate(46,9);drawPen(g,d,PC[p.i])}
- s={c,w:c.width/Q,h:c.height/Q};s.sh=bakeShadow(c,Q,SHP,5);Assets.cache.set(key,s);return s}
-/* Shadows are baked once per sprite and drawn in world space, so every frame is a plain drawImage with no blur cost. */
-const SHP=10;
-function bakeShadow(src,Qs,pad,blur){const w=src.width+2*pad*Qs,h=src.height+2*pad*Qs,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
- g.shadowColor='rgba(0,0,0,.45)';g.shadowBlur=blur*Qs;g.shadowOffsetX=w+16;g.drawImage(src,pad*Qs-(w+16),pad*Qs);return c}
-function pen(g,p,x,y,a,s,al,sh){const sp=spriteFor(p),k=(sh||5)/5;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
- if(al>.2){g.save();g.globalAlpha=al*.9;g.translate(x+3*k,y+5*k);g.rotate(a);g.scale(s,s);g.drawImage(sp.sh,-sp.w/2-SHP,-sp.h/2-SHP,sp.w+2*SHP,sp.h+2*SHP);g.restore()}
- g.save();g.globalAlpha=al;g.translate(x,y);g.rotate(a);g.scale(s,s);g.drawImage(sp.c,-sp.w/2,-sp.h/2,sp.w,sp.h);g.restore()}
+ s={c,w:c.width/Q,h:c.height/Q};Assets.cache.set(key,s);return s}
+function pen(g,p,x,y,a,s,al,sh,pt){const sp=spriteFor(p),k=(sh||5)/5;g.save();g.globalAlpha=al;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.translate(x,y);g.rotate(a);g.scale(s*PS*(pt?Math.max(.45,Math.abs(Math.cos(pt))):1),s*PS);
+ g.shadowColor='rgba(0,0,0,.42)';g.shadowBlur=7*sc*k;g.shadowOffsetX=3*sc*k;g.shadowOffsetY=5*sc*k;g.drawImage(sp.c,-sp.w/2,-sp.h/2,sp.w,sp.h);g.restore()}
 const thumbs=new Map();
 function thumb(idx,ci){const d=PENS[idx]||PENS[0];if(d.src)return d.src;const key=idx+':'+ci;let u=thumbs.get(key);
  if(!u){const c=document.createElement('canvas');c.width=92*3;c.height=18*3;const g=c.getContext('2d');g.scale(3,3);g.translate(46,9);drawPen(g,d,PC[ci]);u=c.toDataURL();thumbs.set(key,u)}return u}
@@ -453,23 +441,23 @@ function obsSprite(o){const Qs=3,pad=8,w=(o.r?o.r*2:o.w)+pad*2,h=(o.r?o.r*2:o.h)
   g.strokeStyle='rgba(0,0,0,.28)';g.lineWidth=1;for(let i=0;i<20;i++){const a=i*Math.PI/10;g.beginPath();g.moveTo(Math.cos(a)*(r-3),Math.sin(a)*(r-3));g.lineTo(Math.cos(a)*r,Math.sin(a)*r);g.stroke()}
   g.fillStyle='#ede9fe';g.beginPath();g.arc(0,0,r-6,0,6.3);g.fill();g.strokeStyle='rgba(0,0,0,.2)';g.beginPath();g.arc(0,0,r-6,0,6.3);g.stroke();
   g.fillStyle='#7c3aed';g.beginPath();g.arc(0,0,r-10,0,6.3);g.fill()}
- return{c,w,h,sh:bakeShadow(c,Qs,SHP,5)}}
+ return{c,w,h}}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- if(rot)cx.setTransform(0,sc,-sc,0,H*sc,0);else cx.setTransform(sc,0,0,sc,0,0);cx.translate(sx,sy);cx.drawImage(Assets.bench.img||Assets.bench.proc||fallback,0,0,W,H);if(!G)return;
- if(S.ink&&inkUsed)cx.drawImage(ink,0,0,W,H);
+ if(rot)cx.setTransform(0,sc,-sc,0,(V.y+V.h)*sc,-V.x*sc);else cx.setTransform(sc,0,0,sc,-V.x*sc,-V.y*sc);cx.translate(sx,sy);cx.drawImage(Assets.bench.img||Assets.bench.proc||fallback,0,0,W,H);if(!G)return;
+ if(S.ink){cx.globalCompositeOperation='multiply';cx.drawImage(ink,0,0,W,H);cx.globalCompositeOperation='source-over'}
  const now=performance.now(),cur=G.pl[G.t];
- for(const o of G.obs){cx.save();cx.translate(o.x+3,o.y+5);cx.rotate(o.a);cx.globalAlpha=.9;cx.drawImage(o.sp.sh,-o.sp.w/2-SHP,-o.sp.h/2-SHP,o.sp.w+2*SHP,o.sp.h+2*SHP);cx.restore();
-  cx.save();cx.translate(o.x,o.y);cx.rotate(o.a);cx.drawImage(o.sp.c,-o.sp.w/2,-o.sp.h/2,o.sp.w,o.sp.h);cx.restore()}
- if(G.st==='aim'){const b=cur.body.position,r0=S.rm?34:34+3*Math.sin(t/200),ga=cx.createRadialGradient(b.x,b.y,8,b.x,b.y,r0+14);ga.addColorStop(0,PC[cur.i]+'55');ga.addColorStop(1,PC[cur.i]+'00');cx.fillStyle=ga;cx.beginPath();cx.arc(b.x,b.y,r0+14,0,6.283);cx.fill();cx.strokeStyle=PC[cur.i];cx.lineWidth=2.5;cx.globalAlpha=.85;cx.beginPath();cx.arc(b.x,b.y,r0,0,6.283);cx.stroke();cx.globalAlpha=1}
+ for(const o of G.obs){cx.save();cx.translate(o.x,o.y);cx.rotate(o.a);cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=8*sc;cx.shadowOffsetX=3*sc;cx.shadowOffsetY=5*sc;cx.drawImage(o.sp.c,-o.sp.w/2,-o.sp.h/2,o.sp.w,o.sp.h);cx.restore()}
+ if(G.st==='aim'){const b=cur.body.position,r0=S.rm?PL*.42:PL*.42+3*Math.sin(t/200),ga=cx.createRadialGradient(b.x,b.y,8,b.x,b.y,r0+14);ga.addColorStop(0,PC[cur.i]+'55');ga.addColorStop(1,PC[cur.i]+'00');cx.fillStyle=ga;cx.beginPath();cx.arc(b.x,b.y,r0+14,0,6.283);cx.fill();cx.strokeStyle=PC[cur.i];cx.lineWidth=2.5;cx.globalAlpha=.85;cx.beginPath();cx.arc(b.x,b.y,r0,0,6.283);cx.stroke();cx.globalAlpha=1;
+  if(!S.hud){const fs=Math.round(13/cs),lb=cur.name+(cur.ai?' · AI':''),up=b.y-r0-fs*1.6>V.y;cx.save();cx.translate(b.x,up?b.y-r0-6:b.y+r0+6);if(rot)cx.rotate(-Math.PI/2);cx.font=`700 ${fs}px "Hind Siliguri",system-ui,sans-serif`;cx.textAlign='center';cx.textBaseline=up?'bottom':'top';cx.lineJoin='round';cx.lineWidth=fs/3.5;cx.strokeStyle='rgba(0,0,0,.7)';cx.strokeText(lb,0,0);cx.fillStyle=PC[cur.i];cx.fillText(lb,0,0);cx.restore()}}
  for(const p of G.pl){const b=p.body;
-  if(!p.fell){if(p.alive){if(!S.rm&&b.speed>4)for(const m of[4,2])pen(cx,p,b.position.x-b.velocity.x*m,b.position.y-b.velocity.y*m,b.angle,1,.1);pen(cx,p,b.position.x,b.position.y,b.angle,1,1)}}
+  if(!p.fell){if(p.alive){if(!S.rm&&b.speed>4)for(const m of[4,2])pen(cx,p,b.position.x-b.velocity.x*m,b.position.y-b.velocity.y*m,b.angle,1,.1);pen(cx,p,b.position.x,b.position.y,b.angle,1+p.z*.011,1,p.z?5+p.z*.5:0,p.pt)}}
   else{const q=(now-p.ft)/700;if(q<1)pen(cx,p,b.position.x,b.position.y,b.angle+(S.rm?0:q*1.5),S.rm?1:1-.4*q,1-q,5+q*10)}}
  let pwv=0;
  if(drag&&G.st==='aim'){const b=cpOf(cur.body,drag.t),vx=b.x-drag.x,vy=b.y-drag.y,l=Math.hypot(vx,vy);cx.fillStyle='#fff';cx.beginPath();cx.arc(b.x,b.y,4,0,6.3);cx.fill();
   if(l>=minD()){const pw=Math.min(l,maxD())/maxD(),a=Math.atan2(vy,vx),len=40+pw*140,col=`hsl(${120-120*pw},85%,55%)`;pwv=pw;
    cx.strokeStyle='rgba(245,245,247,.5)';cx.setLineDash([6,6]);cx.lineWidth=2;cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(drag.x,drag.y);cx.stroke();
-   
+   if(S.asst){cx.strokeStyle='rgba(255,255,255,.3)';cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(b.x+Math.cos(a)*420,b.y+Math.sin(a)*420);cx.stroke()}
    cx.setLineDash([]);
    cx.strokeStyle=col;cx.fillStyle=col;cx.lineWidth=5;cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(b.x+Math.cos(a)*len,b.y+Math.sin(a)*len);cx.stroke();
    const ex=b.x+Math.cos(a)*len,ey=b.y+Math.sin(a)*len;cx.beginPath();cx.moveTo(ex+Math.cos(a)*14,ey+Math.sin(a)*14);cx.lineTo(ex+Math.cos(a+2.5)*12,ey+Math.sin(a+2.5)*12);cx.lineTo(ex+Math.cos(a-2.5)*12,ey+Math.sin(a-2.5)*12);cx.fill();
@@ -479,12 +467,12 @@ function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.he
   cx.globalAlpha=Math.min(1,q.l*2);cx.fillStyle=q.c;if(q.g)cx.fillRect(q.x,q.y,7,4);else{cx.beginPath();cx.arc(q.x,q.y,2.5*q.l+1,0,6.3);cx.fill()}}cx.globalAlpha=1}
 function loop(t){requestAnimationFrame(loop);const dt=Math.min(50,t-last||16);last=t;
  if(G&&!paused){
-  if(G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);acc-=h;c++}if(c>=24)acc=0;inkStep();simCheck(dt)}
+  if(G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);zStep(h/(1000/60));acc-=h;c++}if(c>=24)acc=0;inkStep();simCheck(dt)}
   else if(G.st==='aim'&&G.clk>0){G.clk-=dt;const s=Math.ceil(G.clk/1000);if(s!==G.cs){G.cs=s;clockUI();if(s<=5&&s>0)snd(880,.05,'square',.08)}if(G.clk<=0)timeUp()}}
  draw(t,dt)}
 
 /* ---------- procedural bench (built in slices after first paint) ---------- */
-function makeBench(){const Qb=matchMedia('(pointer:coarse)').matches?1:1.25,w=Math.round(W*Qb),h=Math.round(H*Qb),c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),img=g.createImageData(w,h),D=img.data;
+function makeBench(){const tok=++benchTok,Qb=matchMedia('(pointer:coarse)').matches?1:1.25,w=Math.round(W*Qb),h=Math.round(H*Qb),c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),img=g.createImageData(w,h),D=img.data;
  let s0=11;const R=()=>(s0=s0*16807%2147483647)/2147483647;
  const hs=(x,y)=>{let k=Math.imul(x|0,374761393)+Math.imul(y|0,668265263);k=Math.imul(k^(k>>>13),1274126177);return((k^(k>>>16))>>>0)/4294967295};
  const vn=(x,y)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);return hs(xi,yi)*(1-u)*(1-v)+hs(xi+1,yi)*u*(1-v)+hs(xi,yi+1)*(1-u)*v+hs(xi+1,yi+1)*u*v};
@@ -499,7 +487,7 @@ function makeBench(){const Qb=matchMedia('(pointer:coarse)').matches?1:1.25,w=Ma
   g.strokeStyle='rgba(60,35,12,.16)';g.lineWidth=2;g.beginPath();g.arc(520,150,22,0,6.3);g.stroke();
   for(let i=0;i<110;i++){const x=B.x+30+R()*(B.w-60),y=B.y+30+R()*(B.h-60),a=R()*6.28,l=8+R()*R()*70;g.strokeStyle=R()<.6?`rgba(255,236,206,${.12+R()*.2})`:`rgba(40,20,6,${.14+R()*.2})`;g.lineWidth=.4+R()*.5;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+Math.cos(a+.3)*l/2,y+Math.sin(a+.3)*l/2,x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}
   g.save();g.translate(100,520);g.rotate(-.04);g.font='italic 700 20px Georgia,serif';g.fillStyle='rgba(255,235,200,.3)';g.fillText('Class 9B ♥',1,1.2);g.fillStyle='rgba(55,26,6,.7)';g.fillText('Class 9B ♥',0,0);g.restore();
-  g.strokeStyle='rgba(55,26,6,.6)';g.lineWidth=1.6;g.beginPath();[815,845].forEach(x=>{g.moveTo(x,68);g.lineTo(x,132)});[89,111].forEach(y=>{g.moveTo(793,y);g.lineTo(867,y)});g.stroke();g.font='700 19px Georgia,serif';g.fillStyle='rgba(55,26,6,.65)';g.fillText('X',798,84);g.fillText('O',824,106);g.fillText('X',852,128);
+  g.save();g.translate(W-960,0);g.strokeStyle='rgba(55,26,6,.6)';g.lineWidth=1.6;g.beginPath();[815,845].forEach(x=>{g.moveTo(x,68);g.lineTo(x,132)});[89,111].forEach(y=>{g.moveTo(793,y);g.lineTo(867,y)});g.stroke();g.font='700 19px Georgia,serif';g.fillStyle='rgba(55,26,6,.65)';g.fillText('X',798,84);g.fillText('O',824,106);g.fillText('X',852,128);g.restore();
   g.strokeStyle='rgba(30,64,175,.55)';g.lineWidth=1;g.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI*4/5-1.57;g.lineTo(300+Math.cos(a)*14,520+Math.sin(a)*14)}g.stroke();g.font='italic 15px "Segoe Script","Comic Sans MS",cursive';g.fillStyle='rgba(30,64,175,.5)';g.fillText('Roll 17',326,526);
   for(let i=0;i<60;i++){g.fillStyle='rgba(50,25,8,.45)';g.fillRect(B.x+80+i*10,B.y+7,1,i%5?4:8)}
   for(let i=0;i<350;i++){g.fillStyle=R()<.5?'rgba(255,245,225,.2)':'rgba(30,15,5,.2)';g.fillRect(B.x+R()*B.w,B.y+R()*B.h,1+R(),1+R())}
@@ -521,20 +509,20 @@ function makeBench(){const Qb=matchMedia('(pointer:coarse)').matches?1:1.25,w=Ma
    else{const gx=((x%110)+110)%110,gy=((y%110)+110)%110,tl=hs(Math.floor(x/110),Math.floor(y/110)),sh=Math.max(0,1-sd(x,y,5,24)/42)**1.6*.85;
     let v=22+tl*7+(hs(px,row)-.5)*5+vn(x*.03,y*.03)*6;if(gx<1.6||gy<1.6)v*=.55;v*=(.65+.5*Math.exp(-(((x-CX)**2+(y-CY)**2)/490000)))*(1-sh);r=v*1.05;gg=v;b=v*.95}
    D[i]=r;D[i+1]=gg;D[i+2]=b;D[i+3]=255}
-  row<h?setTimeout(step,0):fin()};
+  if(tok!==benchTok)return;row<h?setTimeout(step,0):fin()};
  step()}
 
 /* ---------- screens ---------- */
 const scr=$('#scr');let cfg=null,tt=0,setupTarget=0,setupPractice=false;
-function toast(m,ms=1600){const e=$('#toast');e.textContent=m;try{e.style.top=Math.max(8,$('#stage').getBoundingClientRect().top+8)+'px'}catch(err){}e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),ms)}
+function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
 function focusKey(){const a=document.activeElement;if(!a||!scr.contains(a))return null;const d=a.dataset;return d.a?`[data-a="${d.a}"]${d.v!=null?`[data-v="${d.v}"]`:''}`:d.k?`[data-k="${d.k}"][data-i="${d.i}"]`:null}
 function show(h,keep){const old=scr.querySelector('.p'),top=keep&&old?old.scrollTop:0,fk=keep?focusKey():null;
  scr.innerHTML=`<div class="p${keep?' still':''}" role="dialog" aria-modal="true">${h}</div>`;scr.style.display='flex';const p=scr.querySelector('.p');
- if(keep){p.scrollTop=top;const f=fk&&scr.querySelector(fk);f&&f.focus({preventScroll:true})}else{const f=scr.querySelector('button');f&&f.focus()}}
+ if(keep){p.scrollTop=top;const f=fk&&scr.querySelector(fk);f&&f.focus({preventScroll:true})}else{const f=scr.querySelector('button,select,input');f&&f.focus()}}
 function hide(){scr.style.display='none'}
-function pz(){if(!G||G.st==='over')return;paused=true;clearTimeout(tmr);show(`<h2>Paused</h2><div class="g"><button class="pr" data-a="res">Resume</button><button data-a="rr">Restart round</button>${M&&M.cfg.series>1?'<button data-a="rst">Restart series</button>':''}<button data-a="menu">Main menu</button></div>`)}
+function pz(){if(!G||G.st==='over')return;paused=true;clearTimeout(tmr);show(`<h2>Paused</h2>${M&&M.cfg.series>1?`<p class="mu">Round ${M.round} · ${G.pl.map(p=>esc(p.name)+' '+M.scores[p.i]).join(' · ')}</p>`:''}<div class="g"><button class="pr" data-a="res">Resume</button><button data-a="rr">Restart round</button>${M&&M.cfg.series>1?'<button data-a="rst">Restart series</button>':''}<button data-a="menu">Main menu</button></div>`)}
 function resume(){paused=false;hide();sched()}
-function menu(){clearTimeout(tmr);G=null;M=null;paused=false;drag=null;parts=[];hud();
+function menu(){clearTimeout(tmr);G=null;M=null;paused=false;drag=null;parts=[];hud();fitWorld();
  const fav=Object.entries(ST.pens).sort((x,y)=>y[1]-x[1])[0],cell=(v,l)=>`<div><b>${v}</b><span>${l}</span></div>`,pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
  show(`<div class="logo"><b>Pen<span> Game</span></b><span lang="bn" class="bn">কলম খেলবি?</span><div class="pg"></div><p class="mu">Flick. Knock. Survive.</p></div>
  <div class="g"><button class="pr" data-a="setup">Play · local 2–6 players</button><div class="g2"><button data-a="quick">Quick match</button><button data-a="prac">Practice vs AI</button><button data-a="rules">Rules</button><button data-a="set">Settings</button></div></div>
@@ -570,13 +558,13 @@ function setupUI(keep){
 function rules(){show(`<h2>How to play</h2><h3>Core rules</h3><ol class="steps"><li>Every player gets one pen on the bench.</li><li>Players take turns.</li><li>Grab your pen anywhere along its length and drag backward to aim. Where you hit it decides how it spins.</li><li>Release to flick.</li><li>Hit opponents’ pens toward the edge.</li><li>Keep your own pen on the bench.</li><li>The last pen on the bench wins.</li></ol>
  <h3>This version’s details</h3><p class="mu">A pen is out as soon as its centre passes the bench edge; touching the edge is safe. You can only flick your own pen. If everyone falls in the same turn, the round is a draw. Online play is not implemented.</p>
  <h3>Match options</h3><p class="mu">Series: first to win most rounds takes the match, and the starting player rotates each round. Shot clock: a human turn is skipped when time runs out. Bench clutter: an eraser, sharpener and glue stick that pens bounce off. Pens leave an ink trail on the bench that clears each round.</p>
- <h3>On a phone</h3><p class="mu">Press a finger on your pen, pull back, then lift to flick. The arrow shows your direction and power. On a tall screen the bench turns to fit, so you can hold the phone either way. Vibration and sound can be switched off in Settings.</p>
+ <h3>Aim line</h3><p class="mu">While you drag, a dotted line shows the direction of your shot. You can turn it off in Settings.</p>
  <div class="g"><button class="pr" data-a="menu">Back</button></div>`)}
 function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'selected':''}>${l}</option>`).join('');
  show(`<h2>Settings</h2><label>Sound <input type="checkbox" data-s="snd" ${S.snd?'checked':''}></label><label>Volume <input type="range" min="0" max="1" step=".05" value="${S.vol}" data-s="vol"></label>
  <label>Reduced motion <input type="checkbox" data-s="rm" ${S.rm?'checked':''}></label><label>Flick strength <select data-s="pw">${o([[.75,'Gentle'],[1,'Normal'],[1.25,'Strong']],S.pw)}</select></label>
  <label>Bench surface <select data-s="phy">${o([['classic','Classic'],['slick','Slippery'],['grippy','Grippy']],S.phy)}</select></label>
- <label>Ink trails <input type="checkbox" data-s="ink" ${S.ink?'checked':''}></label>${typeof navigator!=='undefined'&&navigator.vibrate?`<label>Vibration <input type="checkbox" data-s="vib" ${S.vib?'checked':''}></label>`:''}${document.fullscreenEnabled?'<label>Fullscreen <button type="button" data-a="fs">Toggle</button></label>':''}<label>Accuracy variation <input type="checkbox" data-s="acc" ${S.acc?'checked':''}></label>
+ <label>Aim line <input type="checkbox" data-s="asst" ${S.asst?'checked':''}></label><label>3D hops (z-axis physics) <input type="checkbox" data-s="hop" ${S.hop===0?'':'checked'}></label><label>Scoreboard bar while playing <input type="checkbox" data-s="hud" ${S.hud?'checked':''}></label><label>Auto fullscreen + landscape on phones <input type="checkbox" data-s="afs" ${S.afs===0?'':'checked'}></label><label>Ink trails <input type="checkbox" data-s="ink" ${S.ink?'checked':''}></label>${typeof navigator!=='undefined'&&navigator.vibrate?`<label>Vibration <input type="checkbox" data-s="vib" ${S.vib?'checked':''}></label>`:''}${document.fullscreenEnabled?'<label>Fullscreen <button type="button" data-a="fs">Toggle</button></label>':''}<label>Accuracy variation <input type="checkbox" data-s="acc" ${S.acc?'checked':''}></label>
  <h3>Custom assets</h3><label>Bench image <input type="file" accept="image/*" data-f="bench"></label><label>Add pen skin <input type="file" accept="image/*" data-f="pen"></label>
  <p class="mu">Pen skins: transparent PNG with the pen pointing right. Strength and surface apply from the next round.</p>
  <div class="g2"><button data-a="ares">Reset assets</button><button data-a="rstats">Reset stats</button></div><div class="g"><button class="pr" data-a="menu">Done</button></div>`)}
@@ -588,8 +576,8 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a
  target:()=>{setupTarget=+d.v;setupUI(true)},
  choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+d.v;setupUI(true)},
  rule:()=>{cfg[d.r]=+d.v;setupUI(true)},
- quick:()=>{const s0=ld('pg.cfg',{});begin(normCfg({series:+s0.series,clock:+s0.clock,clutter:+s0.clutter,pl:[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))}));hide()},
- go:()=>{const c=normCfg({series:cfg.series,clock:cfg.clock,clutter:cfg.clutter,pl:cfg.pl.slice(0,cfg.n)});
+ quick:()=>{goFS();const s0=ld('pg.cfg',{});begin(normCfg({series:+s0.series,clock:+s0.clock,clutter:+s0.clutter,pl:[0,1].map(i=>({name:'Player '+(i+1),ai:0,pen:i}))}));hide()},
+ go:()=>{goFS();const c=normCfg({series:cfg.series,clock:cfg.clock,clutter:cfg.clutter,pl:cfg.pl.slice(0,cfg.n)});
   sv('pg.cfg',{...(setupPractice?ld('pg.cfg',{}):{n:cfg.n,pl:cfg.pl}),series:cfg.series,clock:cfg.clock,clutter:cfg.clutter});begin(c);hide()},
  rr:()=>{if(M){round();hide()}},
  rst:()=>{if(M){begin(M.cfg);hide()}},
@@ -598,7 +586,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a
  ares:()=>{Assets.reset();try{localStorage.removeItem('pg.customPens')}catch(err){}toast('Custom assets reset')},
  rstats:()=>{if(rsT>Date.now()){ST={p:0,w:0,e:0,rs:0,pens:{},st:0,bs:0,sh:0,ht:0,sp:0,sw:0,rec:[]};sv('pg.st',ST);rsT=0;a.textContent='Reset stats';toast('Stats reset')}else{rsT=Date.now()+3000;a.textContent='Tap again to confirm'}}}[d.a];f&&f()});
 document.addEventListener('input',e=>{const el=e.target,d=el.dataset;
- if(d.s){S[d.s]=el.type==='checkbox'?+el.checked:(el.type==='range'||d.s==='pw')?+el.value:el.value;sv('pg.s',S);document.body.classList.toggle('rm',!!S.rm)}
+ if(d.s){S[d.s]=el.type==='checkbox'?+el.checked:(el.type==='range'||d.s==='pw')?+el.value:el.value;sv('pg.s',S);document.body.classList.toggle('rm',!!S.rm);if(d.s==='hud')syncHud()}
  else if(d.k==='name'){cfg.pl[+d.i].name=el.value;const nm=scr.querySelector('.roster-card.active strong'),ti=scr.querySelector('[data-t=title]');if(nm)nm.textContent=el.value||'Player';if(ti)ti.textContent=(el.value||'Player')+'’s pen'}
  else if(d.k==='ai'){cfg.pl[+d.i].ai=+el.value;setupUI(true)}});
 document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.dataset.f;if(!f||!el.files||!el.files[0])return;const file=el.files[0],fr=new FileReader();
@@ -607,7 +595,7 @@ document.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.datase
    try{localStorage.setItem('pg.customPens',JSON.stringify(PENS.slice(BUILTIN).map(p=>({n:p.n,src:p.src,len:p.len,band:p.band}))))}catch(err){toast('Pen added for this session, but browser storage is full');return}
    toast('Pen added — choose it in match setup')}};fr.readAsDataURL(file)});
 
-rs();requestAnimationFrame(loop);menu();setTimeout(makeBench,60);
+rs();requestAnimationFrame(loop);menu();queueBench(60);
 })();
 </script>
 
