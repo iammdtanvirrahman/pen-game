@@ -24,11 +24,11 @@ test("service worker parses without syntax errors", () => {
 
 test("3D desk uses perspective and synchronized Matter coordinates", () => {
   const threeModule = html.slice(html.lastIndexOf('<script type="module">'));
-  assert.match(threeModule, /PerspectiveCamera/);
-  assert.match(threeModule, /window\\.__pen3dActive=true/);
-  assert.match(threeModule, /mesh\\.position\\.set\\(p\\.x,600-p\\.y,13/);
-  assert.match(threeModule, /880,520,18/);
-  assert.match(threeModule, /webglcontextlost/);
+  assert.ok(threeModule.includes("PerspectiveCamera"));
+  assert.ok(threeModule.includes("window.__pen3dActive=true"));
+  assert.ok(threeModule.includes("mesh.position.set(p.x,600-p.y,13"));
+  assert.ok(threeModule.includes("BoxGeometry(880,520,18"));
+  assert.ok(threeModule.includes("webglcontextlost"));
 });
 
 test("PWA manifest is valid and scoped to the app", () => {
