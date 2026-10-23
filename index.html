@@ -170,6 +170,7 @@ body.fs #top{display:none!important}
 <button id="fpz" data-a="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
 <div id="scr"></div><div id="toast" role="status"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 <script>
 (()=>{
 const {Engine,Bodies,Body,Composite,Events}=Matter;
@@ -298,7 +299,7 @@ function flick(ang,pw,t=0){const p=G.pl[G.t],b=p.body;if(S.acc)ang+=(Math.random
  const dx=Math.cos(ang),dy=Math.sin(ang),rx=Math.cos(b.angle)*t,ry=Math.sin(b.angle)*t,w=(rx*dy-ry*dx)*sp*b.mass/b.inertia*.3;
  Body.setVelocity(b,{x:dx*sp,y:dy*sp});Body.setAngularVelocity(b,clamp(w,-.35,.35));
  if(S.hop!==0&&pw>.7){const e=Math.min(1,Math.abs(t)/(PL/2));if(Math.random()<.25+.5*e)hop(p,(pw-.65)*5.5*(.5+.5*e)*(.5+Math.random()*.6),t<0?-1:1)}
- p.sh++;G.hit=0;p.lt=null;G.st='sim';G.simT=0;G.sT=0;acc=0;drag=null;snd(260+pw*300,.12,'square',.12,90);vib(12);hud()}
+ p.sh++;G.hit=0;p.lt=null;G.st='sim';G.simT=0;G.sT=0;acc=0;drag=null;snd(260+pw*300,.12,'square',.12,90);vib(12);hud();netBroadcastState()}
 /* ---- z axis: hops, flight, landing, sliding friction ---- */
 function hop(p,vz,spin){if(S.hop===0||p.z>0||p.fell||!p.alive||vz<1.1)return;p.vz=Math.min(6,vz);p.z=.01;p.pw=spin*vz*.07;p.pt=0;p.fl=0}
 function overP(p){const b=p.body,ca=Math.cos(b.angle)*HL,sa=Math.sin(b.angle)*HL,x=b.position.x,y=b.position.y;
@@ -389,11 +390,11 @@ function rs(){fitWorld();const r=$('#stage').getBoundingClientRect();rot=r.heigh
 const pt=e=>{const r=cv.getBoundingClientRect(),ux=(e.clientX-r.left)/r.width,uy=(e.clientY-r.top)/r.height;return rot?{x:V.x+uy*V.w,y:V.y+V.h-ux*V.h}:{x:V.x+ux*V.w,y:V.y+uy*V.h}};
 const maxD=()=>Math.min(260,Math.max(MAXD,90/cs)),minD=()=>Math.max(18,14/cs);
 const cpOf=(b,t)=>({x:b.position.x+Math.cos(b.angle)*t,y:b.position.y+Math.sin(b.angle)*t});
-cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai)return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
+cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p=G.pl[G.t];if(p.ai||(NET.role&&G.t!==NET.localIndex))return;const q=pt(e),b=p.body.position,c=Math.cos(p.body.angle),s=Math.sin(p.body.angle);
  const t=clamp((q.x-b.x)*c+(q.y-b.y)*s,-PL/2,PL/2);if(Math.hypot(q.x-(b.x+c*t),q.y-(b.y+s*t))>Math.min(90,Math.max(36,44/cs)))return;drag={x:q.x,y:q.y,t};cv.setPointerCapture(e.pointerId);e.preventDefault()});
 cv.addEventListener('pointermove',e=>{if(drag){const q=pt(e);drag.x=q.x;drag.y=q.y}});
 cv.addEventListener('pointerup',e=>{if(!drag||!G||G.st!=='aim'){drag=null;return}const c=cpOf(G.pl[G.t].body,drag.t),q=pt(e),vx=c.x-q.x,vy=c.y-q.y,l=Math.hypot(vx,vy);
- if(l<minD()){drag=null;return}flick(Math.atan2(vy,vx),Math.min(l,maxD())/maxD(),drag.t)});
+ if(l<minD()){drag=null;return}const ang=Math.atan2(vy,vx),pw=Math.min(l,maxD())/maxD(),offset=drag.t;if(NET.role==='guest'){netSend({type:'flick',player:NET.localIndex,ang,pw,t:offset});drag=null;return}flick(ang,pw,offset)});
 cv.addEventListener('pointercancel',()=>{drag=null});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('resize',rs);
@@ -478,7 +479,7 @@ function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.he
  for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.x+=q.vx*dt/16;q.y+=q.vy*dt/16;if(q.g)q.vy+=.25*dt/16;q.l-=dt/(q.g?1500:400);if(q.l<=0){parts.splice(i,1);continue}
   cx.globalAlpha=Math.min(1,q.l*2);cx.fillStyle=q.c;if(q.g)cx.fillRect(q.x,q.y,7,4);else{cx.beginPath();cx.arc(q.x,q.y,2.5*q.l+1,0,6.3);cx.fill()}}cx.globalAlpha=1}
 function loop(t){requestAnimationFrame(loop);const dt=Math.min(50,t-last||16);last=t;
- if(G&&!paused){
+ if(G&&!paused&&NET.role!=='guest'){
   if(G.st==='sim'){acc+=dt;const h=1000/240;let c=0;while(acc>=h&&c<24){Engine.update(eng,h);zStep(h/(1000/60));acc-=h;c++}if(c>=24)acc=0;inkStep();simCheck(dt)}
   else if(G.st==='aim'&&G.clk>0){G.clk-=dt;const s=Math.ceil(G.clk/1000);if(s!==G.cs){G.cs=s;clockUI();if(s<=5&&s>0)snd(880,.05,'square',.08)}if(G.clk<=0)timeUp()}}
  draw(t,dt)}
@@ -537,7 +538,7 @@ function resume(){paused=false;hide();sched()}
 function menu(){clearTimeout(tmr);G=null;M=null;paused=false;drag=null;parts=[];hud();fitWorld();
  const fav=Object.entries(ST.pens).sort((x,y)=>y[1]-x[1])[0],cell=(v,l)=>`<div><b>${v}</b><span>${l}</span></div>`,pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
  show(`<div class="logo"><b>Pen<span> Game</span></b><span lang="bn" class="bn">কলম খেলবি?</span><div class="pg"></div><p class="mu">Flick. Knock. Survive.</p></div>
- <div class="g"><button class="pr" data-a="setup">Play · local 2–6 players</button><div class="g2"><button data-a="quick">Quick match</button><button data-a="prac">Practice vs AI</button><button data-a="rules">Rules</button><button data-a="set">Settings</button></div></div>
+ <div class="g"><div class="g2"><button data-a="setup">Play local · 2–6</button><button class="pr" data-a="online">Play online · 2 players</button></div><div class="g2"><button data-a="quick">Quick match</button><button data-a="prac">Practice vs AI</button><button data-a="rules">Rules</button><button data-a="set">Settings</button></div></div>
  <h3>Player 1 stats</h3><div class="st">${cell(ST.p,'Rounds')}${cell(ST.w,'Won')}${cell(pc(ST.w,ST.p),'Win rate')}${cell(ST.e,'Knock-outs')}${cell(pc(ST.ht,ST.sh),'Hit rate')}${cell(ST.p?(ST.rs/ST.p).toFixed(1):'–','Avg rank')}${cell(ST.bs,'Best streak')}${cell(ST.sw+'/'+ST.sp,'Series won')}${cell(fav&&PENS[fav[0]]?esc(PENS[fav[0]].n.split(' ')[0]):'–','Fav pen')}</div>
  <h3>Recent</h3><div class="mu">${ST.rec.length?ST.rec.map(esc).join('<br>'):'No matches yet.'}</div>`)}
 function setup(prac){setupPractice=!!prac;setupTarget=0;const s0=ld('pg.cfg',{}),base=[0,1,2,3,4,5].map(i=>prac?{name:i?'AI Rival '+i:'You',ai:i?2:0,pen:i%BUILTIN}:{name:'Player '+(i+1),ai:0,pen:i%BUILTIN});
@@ -568,7 +569,7 @@ function setupUI(keep){
   <div class="setup-footer"><span>Names, pens and rules are remembered on this device.</span><div class="g2"><button data-a="menu">Back</button><button class="pr" data-a="go">Start match →</button></div></div>
  </div>`,keep)}
 function rules(){show(`<h2>How to play</h2><h3>Core rules</h3><ol class="steps"><li>Every player gets one pen on the bench.</li><li>Players take turns.</li><li>Grab your pen anywhere along its length and drag backward to aim. Where you hit it decides how it spins.</li><li>Release to flick.</li><li>Hit opponents’ pens toward the edge.</li><li>Keep your own pen on the bench.</li><li>The last pen on the bench wins.</li></ol>
- <h3>This version’s details</h3><p class="mu">A pen is out as soon as its centre passes the bench edge; touching the edge is safe. You can only flick your own pen. If everyone falls in the same turn, the round is a draw. Online play is not implemented.</p>
+ <h3>This version’s details</h3><p class="mu">A pen is out as soon as its centre passes the bench edge; touching the edge is safe. You can only flick your own pen. If everyone falls in the same turn, the round is a draw. Online rooms support two players over a direct peer-to-peer connection; the host runs the physics simulation.</p>
  <h3>Match options</h3><p class="mu">Series: first to win most rounds takes the match, and the starting player rotates each round. Shot clock: a human turn is skipped when time runs out. Bench clutter: an eraser, sharpener and glue stick that pens bounce off. Pens leave an ink trail on the bench that clears each round.</p>
  <h3>Aim line</h3><p class="mu">While you drag, a dotted line shows the direction of your shot. You can turn it off in Settings.</p>
  <div class="g"><button class="pr" data-a="menu">Back</button></div>`)}
@@ -581,6 +582,7 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'sele
  <p class="mu">Pen skins: transparent PNG with the pen pointing right. Strength and surface apply from the next round.</p>
  <div class="g2"><button data-a="ares">Reset assets</button><button data-a="rstats">Reset stats</button></div><div class="g"><button class="pr" data-a="menu">Done</button></div>`)}
 
+/* ONLINE_MULTIPLAYER_CODE_GOES_HERE */
 let rsT=0;
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const d=a.dataset,f={
  setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,menu,pause:pz,res:resume,
