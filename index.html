@@ -608,8 +608,9 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'sele
 
 
 /* ---------- online multiplayer: 2 players, host-authoritative physics ---------- */
-const NET={role:null,peer:null,conn:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,localIndex:0,started:false,syncTimer:0,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,closing:false,trails:[]};
-const netSafePen=v=>Number.isInteger(+v)&&+v>=0&&+v<PENS.length?+v:0;
+const NET={role:null,peer:null,conn:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,clock:0,clutter:0,localIndex:0,started:false,syncTimer:0,connectionTimer:0,lastJoin:null,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,closing:false,trails:[]};
+// Online games use the six shared built-in pens. Custom data-URL skins are device-local.
+const netSafePen=v=>Number.isInteger(+v)&&+v>=0&&+v<BUILTIN?+v:0;
 function netSend(message){try{if(NET.conn&&NET.conn.open)NET.conn.send(message)}catch(e){}}
 function netCode(){const a='abcdefghjkmnpqrstuvwxyz23456789';let s='pg-';for(let i=0;i<16;i++)s+=a[Math.random()*a.length|0];return s}
 function netInvite(id){const u=new URL(location.href);u.searchParams.set('room',id);u.hash='';return u.href}
@@ -620,16 +621,21 @@ function netOnlineMenu(){
  const chosen=netSafePen(saved.pen);
  NET.draftPen=chosen;
  const seriesOptions=SERIES.map(x=>"<option value='"+x[0]+"' "+(x[0]===(+last.series||1)?'selected':'')+">"+esc(x[1])+"</option>").join('');
- const penCards=PENS.map((p,i)=>"<button type='button' class='pen-option "+(i===chosen?'selected':'')+"' data-a='netChoosePen' data-v='"+i+"' aria-pressed='"+(i===chosen)+"' style='--player-color:"+PC[0]+"'><span class='pen-art'><img src='"+esc(thumb(i,0))+"' alt='"+esc(p.n)+"'></span><span class='pen-option-name'>"+esc(p.n)+"</span><span class='pen-option-status'>"+(i===chosen?'✓ SELECTED':'SELECT PEN')+"</span></button>").join('');
+ const clockSaved=CLOCKS.some(x=>x[0]===+saved.clock)?+saved.clock:(+last.clock||0);
+ const clutterSaved=CLUTTER.some(x=>x[0]===+saved.clutter)?+saved.clutter:(+last.clutter||0);
+ const clockOptions=CLOCKS.map(x=>"<option value='"+x[0]+"' "+(x[0]===clockSaved?'selected':'')+">"+esc(x[1])+"</option>").join('');
+ const clutterOptions=CLUTTER.map(x=>"<option value='"+x[0]+"' "+(x[0]===clutterSaved?'selected':'')+">"+esc(x[1])+"</option>").join('');
+ const penCards=PENS.slice(0,BUILTIN).map((p,i)=>"<button type='button' class='pen-option "+(i===chosen?'selected':'')+"' data-a='netChoosePen' data-v='"+i+"' aria-pressed='"+(i===chosen)+"' style='--player-color:"+PC[0]+"'><span class='pen-art'><img src='"+esc(thumb(i,0))+"' alt='"+esc(p.n)+"'></span><span class='pen-option-name'>"+esc(p.n)+"</span><span class='pen-option-status'>"+(i===chosen?'✓ SELECTED':'SELECT PEN')+"</span></button>").join('');
  show("<div class='logo'><b>Pen<span> Online</span></b><p class='mu'>Challenge a friend anywhere.</p></div>"+
   "<p class='mu'>Choose your own name and pen first. Create a room and share the invite, or join a friend's room. Both players choose their own pen before the match.</p>"+
   "<div class='player-fields'><label>Your name<input id='netname' type='text' maxlength='14' value='"+esc(saved.name||'Player')+"' placeholder='Your name'></label><label>Series<select id='netseries'>"+seriesOptions+"</select></label></div>"+
+  "<div class='player-fields'><label>Shot clock<select id='netclock'>"+clockOptions+"</select></label><label>Bench obstacles<select id='netclutter'>"+clutterOptions+"</select></label></div>"+
   "<div class='gallery-head'><h4>Choose your pen</h4><span>"+PENS.length+" PEN SKINS</span></div>"+
   "<div class='pen-gallery net-pen-gallery'>"+penCards+"</div>"+
   "<label>Room code<input id='netroom' type='text' autocomplete='off' autocapitalize='none' spellcheck='false' value='"+esc(room)+"' placeholder='Paste the room code'></label>"+
   "<div class='g2'><button class='"+(room?'':'pr')+"' data-a='createRoom'>Create room</button><button class='"+(room?'pr':'')+"' data-a='joinRoom'>"+(room?'Join this room →':'Join room')+"</button></div>"+
   (room?"<p class='mu'>Invite link detected. Your room code is already filled in; select your pen and tap Join this room.</p>":"")+
-  "<div class='g'><button data-a='menu'>Back to main menu</button></div><p class='mu'>Every pen has its own name and appearance. Your selection is saved on this device.</p>");
+  "<div class='g'><button data-a='menu'>Back to main menu</button></div><p class='mu'>Online uses the six shared built-in pens. Host settings apply to both players; choices are saved on this device.</p>");
 }
 function netChoosePen(index){
  const i=netSafePen(index);NET.draftPen=i;
@@ -644,8 +650,10 @@ function netFields(){
  const name=String($('#netname')?.value||'Player').trim().slice(0,14)||'Player';
  const pen=netSafePen(NET.draftPen??NET.localPen);
  const sf=$('#netseries'),series=[1,3,5].includes(+(sf?.value))?+sf.value:1;
- sv('pg.net',{name:name,pen:pen});
- return{name:name,pen:pen,series:series};
+ const cf=$('#netclock'),clock=CLOCKS.some(x=>x[0]===+(cf?.value))?+(cf?.value):0;
+ const of=$('#netclutter'),clutter=CLUTTER.some(x=>x[0]===+(of?.value))?+(of?.value):0;
+ sv('pg.net',{name:name,pen:pen,series:series,clock:clock,clutter:clutter});
+ return{name:name,pen:pen,series:series,clock:clock,clutter:clutter};
 }
 function netCleanup(){
  NET.closing=true;
