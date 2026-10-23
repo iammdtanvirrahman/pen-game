@@ -606,23 +606,33 @@ function netInvite(id){const u=new URL(location.href);u.searchParams.set('room',
 function netOnlineMenu(){
  const room=new URLSearchParams(location.search).get('room')||'';
  const last=ld('pg.cfg',{});
- const penOptions=PENS.map((p,i)=>"<option value='"+i+"'>"+esc(p.n)+"</option>").join('');
+ const saved=ld('pg.net',{name:'Player',pen:0});
+ const chosen=netSafePen(saved.pen);
+ NET.draftPen=chosen;
  const seriesOptions=SERIES.map(x=>"<option value='"+x[0]+"' "+(x[0]===(+last.series||1)?'selected':'')+">"+esc(x[1])+"</option>").join('');
+ const penCards=PENS.map((p,i)=>"<button type='button' class='pen-option "+(i===chosen?'selected':'')+"' data-a='netChoosePen' data-v='"+i+"' aria-pressed='"+(i===chosen)+"' style='--player-color:"+PC[0]+"'><span class='pen-art'><img src='"+esc(thumb(i,0))+"' alt='"+esc(p.n)+"'></span><span class='pen-option-name'>"+esc(p.n)+"</span><span class='pen-option-status'>"+(i===chosen?'✓ SELECTED':'SELECT PEN')+"</span></button>").join('');
  show("<div class='logo'><b>Pen<span> Online</span></b><p class='mu'>Challenge a friend anywhere.</p></div>"+
-  "<p class='mu'>Create a room and share its invite link, or enter a friend's room code. Online matches support two players; the host controls physics and both players see the same moves.</p>"+
-  "<div class='player-fields'><label>Your name<input id='netname' type='text' maxlength='14' value='Player' placeholder='Your name'></label><label>Your pen<select id='netpen'>"+penOptions+"</select></label></div>"+
-  "<label>Series<select id='netseries'>"+seriesOptions+"</select></label>"+
+  "<p class='mu'>Choose your own name and pen first. Create a room and share the invite, or join a friend's room. Both players choose their own pen before the match.</p>"+
+  "<div class='player-fields'><label>Your name<input id='netname' type='text' maxlength='14' value='"+esc(saved.name||'Player')+"' placeholder='Your name'></label><label>Series<select id='netseries'>"+seriesOptions+"</select></label></div>"+
+  "<div class='gallery-head'><h4>Choose your pen</h4><span>"+PENS.length+" PEN SKINS</span></div>"+
+  "<div class='pen-gallery net-pen-gallery'>"+penCards+"</div>"+
   "<label>Room code<input id='netroom' type='text' autocomplete='off' autocapitalize='none' spellcheck='false' value='"+esc(room)+"' placeholder='Paste the room code'></label>"+
   "<div class='g2'><button class='"+(room?'':'pr')+"' data-a='createRoom'>Create room</button><button class='"+(room?'pr':'')+"' data-a='joinRoom'>"+(room?'Join this room →':'Join room')+"</button></div>"+
-  (room?"<p class='mu'>Invite link detected — your room code is already filled in. Choose your name and pen, then tap Join this room.</p>":"")+
-  "<div class='g'><button data-a='menu'>Back to main menu</button></div><p class='mu'>Requires internet and a browser with WebRTC support.</p>");
- const saved=ld('pg.net',{name:'Player',pen:0});
- const name=$('#netname');if(name)name.value=saved.name||'Player';
- const pen=$('#netpen');if(pen)pen.value=String(netSafePen(saved.pen));
+  (room?"<p class='mu'>Invite link detected. Your room code is already filled in; select your pen and tap Join this room.</p>":"")+
+  "<div class='g'><button data-a='menu'>Back to main menu</button></div><p class='mu'>Every pen has its own name and appearance. Your selection is saved on this device.</p>");
+}
+function netChoosePen(index){
+ const i=netSafePen(index);NET.draftPen=i;
+ const saved=ld('pg.net',{name:$('#netname')?$('#netname').value:'Player',pen:i});
+ saved.pen=i;if($('#netname'))saved.name=$('#netname').value||'Player';sv('pg.net',saved);
+ document.querySelectorAll('.net-pen-gallery [data-a="netChoosePen"]').forEach(el=>{
+  const on=+el.dataset.v===i;el.classList.toggle('selected',on);el.setAttribute('aria-pressed',String(on));
+  const status=el.querySelector('.pen-option-status');if(status)status.textContent=on?'✓ SELECTED':'SELECT PEN';
+ });
 }
 function netFields(){
  const name=String($('#netname')?.value||'Player').trim().slice(0,14)||'Player';
- const pen=netSafePen($('#netpen')?.value??NET.localPen);
+ const pen=netSafePen(NET.draftPen??NET.localPen);
  const sf=$('#netseries'),series=[1,3,5].includes(+(sf?.value))?+sf.value:1;
  sv('pg.net',{name:name,pen:pen});
  return{name:name,pen:pen,series:series};
@@ -688,7 +698,7 @@ function netRenderLobby(){
   ? "<div class='invite-layout'><div class='invite-actions'><h3>Invite a friend</h3><p class='mu'>Easiest: share the link or let your friend scan the QR with their phone camera.</p><button class='pr' data-a='shareInvite'>Share invite ↗</button><button data-a='copyInvite'>Copy invite link</button><button data-a='copyRoom'>Copy room code</button><div class='invite-code'>"+esc(NET.room)+"</div></div><div class='invite-qr-wrap'><div id='roomqr' class='invite-qr' aria-label='Room invite QR code'></div><span>Scan using the other phone</span></div></div>"
   : "<p class='mu'>You're connected to the host. The host will start the match.</p><div class='rk'><span class='nm'>Room code</span><strong>"+esc(NET.room)+"</strong></div>";
  show("<div class='logo'><b>Room <span>"+(host?'created':'joined')+"</span></b></div>"+
-  "<div class='st'><div><b>"+(host?esc(NET.localName):esc(NET.remoteName))+"</b><span>Host</span></div><div><b>"+(host?(connected?esc(NET.remoteName):'Waiting…'):esc(NET.localName))+"</b><span>"+(host?(connected?'Opponent connected':'Waiting for friend'):'You')+"</span></div><div><b>"+(connected?'● Online':'…')+"</b><span>Connection</span></div></div>"+
+  "<div class='st'><div><b>"+(host?esc(NET.localName):esc(NET.remoteName))+"</b><span>"+esc((PENS[host?NET.localPen:NET.remotePen]||PENS[0]).n)+"</span></div><div><b>"+(host?(connected?esc(NET.remoteName):'Waiting…'):esc(NET.localName))+"</b><span>"+(host?(connected?esc((PENS[NET.remotePen]||PENS[0]).n):'Choose a pen on their device'):esc((PENS[NET.localPen]||PENS[0]).n))+"</span></div><div><b>"+(connected?'● Online':'…')+"</b><span>Connection</span></div></div>"+
   inviteTools+
   "<div class='g2'><button data-a='leaveOnline'>Leave room</button>"+(host?"<button class='pr' data-a='startOnline' "+(connected?'':'disabled')+">Start match</button>":"<button disabled>Waiting for host…</button>")+"</div>"+
   (host&&!connected?"<p class='mu'>Keep this screen open while your friend joins. Start match will unlock when they connect.</p>":""));
@@ -721,7 +731,7 @@ function netStartMatch(){
  ]});
  NET.started=true;NET.lastGameId=null;NET.lastSeq=0;NET.resultShownId=null;NET.trails=[];
  goFS();begin(conf);NET.lastGameId=G.id;hide();
- netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,started:true});
+ netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,hostPen:NET.localPen,guestPen:NET.remotePen,started:true});
  if(NET.syncTimer)clearInterval(NET.syncTimer);
  NET.syncTimer=setInterval(netBroadcastState,50);netBroadcastState();
 }
@@ -808,7 +818,7 @@ function netHandleMessage(message){
   if(message.type==='hello'){
    NET.remoteName=String(message.name||(NET.conn&&NET.conn.metadata&&NET.conn.metadata.name)||'Opponent').trim().slice(0,14)||'Opponent';
    NET.remotePen=netSafePen(message.pen??(NET.conn&&NET.conn.metadata&&NET.conn.metadata.pen)??1);NET.connected=!!(NET.conn&&NET.conn.open);
-   netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,started:NET.started});
+   netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,hostPen:NET.localPen,guestPen:NET.remotePen,started:NET.started});
    if(NET.started)netBroadcastState();else netRenderLobby();return;
   }
   if(message.type==='flick'&&NET.started&&!paused&&G&&G.st==='aim'&&G.t===1&&+message.player===1&&Number.isFinite(+message.dirX)&&Number.isFinite(+message.dirY)&&Number.isFinite(+message.pw)){
@@ -825,7 +835,7 @@ function netHandleMessage(message){
   return;
  }
  if(message.type==='lobby'){
-  NET.remoteName=String(message.host||'Host').slice(0,14);
+  NET.remoteName=String(message.host||'Host').slice(0,14);NET.remotePen=netSafePen(message.hostPen??NET.remotePen);if(message.guest)NET.localName=String(message.guest).slice(0,14);if(message.guestPen!=null)NET.localPen=netSafePen(message.guestPen);
   if(message.started&&!NET.started){NET.started=true;NET.lastSeq=0;NET.lastGameId=null}
   if(!NET.started)netRenderLobby();return;
  }
@@ -835,7 +845,7 @@ function netHandleMessage(message){
 
 let rsT=0;
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const d=a.dataset,f={
- setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,online:netOnlineMenu,menu:()=>NET.role?netLeave():menu(),pause:()=>{if(NET.role==='guest'){toast('Only the host can pause this match');return}pz()},res:resume,
+ setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,online:netOnlineMenu,netChoosePen:()=>netChoosePen(d.v),menu:()=>NET.role?netLeave():menu(),pause:()=>{if(NET.role==='guest'){toast('Only the host can pause this match');return}pz()},res:resume,
  createRoom:()=>{const f=netFields();netCreateRoom(f)},joinRoom:()=>{const f=netFields();netJoinRoom($('#netroom')?.value,f)},startOnline:netStartMatch,leaveOnline:netLeave,copyRoom:()=>netCopy(NET.room),copyInvite:()=>netCopy(NET.invite),shareInvite:netShareInvite,
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
  target:()=>{setupTarget=+d.v;setupUI(true)},
