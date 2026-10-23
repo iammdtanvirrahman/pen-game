@@ -1,5 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Pen Game</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>  <title>Pen Game — V5.0</title>
+  <meta name="theme-color" content="#0b0b0d">
+  <meta name="description" content="Play the Bangladeshi school-bench pen game with friends or locally.">
+  <meta name="application-name" content="Pen Game">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+</head><body>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Permanent+Marker&display=swap">
 <style>
@@ -128,7 +135,10 @@ input[type=range]{accent-color:var(--ac);padding:0;width:150px;border:0;backgrou
  .chip em,#turn small{display:none}.p{padding:16px}.p:has(.setup-screen){padding:0}}
 @media(max-width:620px){#pwr{display:none}#top{padding:6px 8px;gap:6px 8px}.chip b{width:28px;height:28px}#order{gap:8px}}
 @media(max-height:480px){body{padding-block:4px;gap:4px}#top{padding:4px 8px;gap:4px 8px}#turn{padding:3px 10px 3px 8px}#turn small,.chip em,#pwr{display:none}.chip b{width:26px;height:26px}#top button{width:40px;height:40px}.p{padding:14px}#toast{top:calc(56px + env(safe-area-inset-top,0px))}}
-@media(pointer:coarse){button,select,input[type=text],.seg button{min-height:44px}}
+@media(pointer:coarse){button,select,input[type=text],.seg button{min-height:44px}
+:focus-visible{outline:2px solid var(--ac2);outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.48}
+@media(hover:hover){button:not(:disabled):hover{filter:brightness(1.12)}}}
 .rm *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 /* Full-screen play: the bench fills the whole screen, the scoreboard bar is hidden unless turned on in Settings. */
@@ -551,7 +561,7 @@ function pz(){if(!G||G.st==='over')return;paused=true;clearTimeout(tmr);show(`<h
 function resume(){paused=false;hide();sched()}
 function menu(){clearTimeout(tmr);G=null;M=null;paused=false;drag=null;parts=[];hud();fitWorld();
  const fav=Object.entries(ST.pens).sort((x,y)=>y[1]-x[1])[0],cell=(v,l)=>`<div><b>${v}</b><span>${l}</span></div>`,pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
- show(`<div class="logo"><b>Pen<span> Game</span></b><span lang="bn" class="bn">কলম খেলবি?</span><div class="pg"></div><p class="mu">Flick. Knock. Survive.</p></div>
+ show(`<div class="logo"><b>Pen<span> Game</span></b><span lang="bn" class="bn">কলম খেলবি?</span><div class="pg"></div><p class="mu">Flick. Knock. Survive.</p><p class="mu">Version 5.0 · Local play + online rooms</p></div>
  <div class="g"><div class="g2"><button data-a="setup">Play local · 2–6</button><button class="pr" data-a="online">Play online · 2 players</button></div><div class="g2"><button data-a="quick">Quick match</button><button data-a="prac">Practice vs AI</button><button data-a="rules">Rules</button><button data-a="set">Settings</button></div></div>
  <h3>Player 1 stats</h3><div class="st">${cell(ST.p,'Rounds')}${cell(ST.w,'Won')}${cell(pc(ST.w,ST.p),'Win rate')}${cell(ST.e,'Knock-outs')}${cell(pc(ST.ht,ST.sh),'Hit rate')}${cell(ST.p?(ST.rs/ST.p).toFixed(1):'–','Avg rank')}${cell(ST.bs,'Best streak')}${cell(ST.sw+'/'+ST.sp,'Series won')}${cell(fav&&PENS[fav[0]]?esc(PENS[fav[0]].n.split(' ')[0]):'–','Fav pen')}</div>
  <h3>Recent</h3><div class="mu">${ST.rec.length?ST.rec.map(esc).join('<br>'):'No matches yet.'}</div>`)}
