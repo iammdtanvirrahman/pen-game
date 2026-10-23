@@ -608,7 +608,7 @@ function sett(){const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${k==v?'sele
 
 
 /* ---------- online multiplayer: 2 players, host-authoritative physics ---------- */
-const NET={role:null,peer:null,conn:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,clock:0,clutter:0,localIndex:0,started:false,syncTimer:0,connectionTimer:0,lastJoin:null,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,closing:false,trails:[]};
+const NET={role:null,peer:null,conn:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,clock:0,clutter:0,localIndex:0,started:false,syncTimer:0,connectionTimer:0,recoveryTimer:0,lastJoin:null,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,closing:false,trails:[]};
 // Online games use the six shared built-in pens. Custom data-URL skins are device-local.
 const netSafePen=v=>Number.isInteger(+v)&&+v>=0&&+v<BUILTIN?+v:0;
 function netSend(message){try{if(NET.conn&&NET.conn.open)NET.conn.send(message)}catch(e){}}
@@ -659,7 +659,8 @@ function netCleanup(){
  NET.closing=true;
  if(NET.syncTimer)clearInterval(NET.syncTimer);
  if(NET.connectionTimer)clearTimeout(NET.connectionTimer);
- NET.syncTimer=0;NET.connectionTimer=0;
+ if(NET.recoveryTimer)clearTimeout(NET.recoveryTimer);
+ NET.syncTimer=0;NET.connectionTimer=0;NET.recoveryTimer=0;
  const conn=NET.conn,peer=NET.peer;NET.conn=null;NET.peer=null;
  try{if(conn)conn.close()}catch(e){}
  try{if(peer&&!peer.destroyed)peer.destroy()}catch(e){}
@@ -670,12 +671,24 @@ function netError(message){
  netCleanup();
  show("<h2>Couldn't connect</h2><p class='mu'>"+esc(message||'The online service or network is unavailable. Check your connection and try again.')+"</p><div class='g'><button class='pr' data-a='online'>Try again</button><button data-a='menu'>Main menu</button></div>");
 }
+function netWatchPeer(peer){
+ peer.on('disconnected',()=>{
+  if(NET.closing||NET.peer!==peer)return;
+  toast('Room service disconnected. Trying to reconnect…');
+  if(NET.recoveryTimer)clearTimeout(NET.recoveryTimer);
+  NET.recoveryTimer=setTimeout(()=>{
+   NET.recoveryTimer=0;
+   if(NET.closing||NET.peer!==peer||peer.destroyed||!peer.disconnected)return;
+   try{peer.reconnect()}catch(e){toast('Room service recovery failed. Rejoin the room if needed.')}
+  },1200);
+ });
+}
 function netCreateRoom(fields){
  if(typeof Peer==='undefined'){netError('The peer connection library could not load. Refresh the page and try again.');return}
  netCleanup();NET.lastJoin=null;NET.role='host';NET.localIndex=0;NET.localName=fields.name;NET.localPen=netSafePen(fields.pen);NET.series=fields.series;NET.clock=fields.clock||0;NET.clutter=fields.clutter||0;
  show("<h2>Creating room…</h2><p class='mu'>Connecting to the room service.</p><div class='g'><button data-a='leaveOnline'>Cancel</button></div>");
  try{
-  const peer=new Peer(netCode(),{debug:0});NET.peer=peer;
+  const peer=new Peer(netCode(),{debug:0});NET.peer=peer;netWatchPeer(peer);
   NET.connectionTimer=setTimeout(()=>{if(NET.role==='host'&&!NET.room)netError('Room creation timed out. Check your connection and try again.')},18000);
   peer.on('open',id=>{if(NET.closing||NET.role!=='host')return;if(NET.connectionTimer)clearTimeout(NET.connectionTimer);NET.connectionTimer=0;NET.room=id;NET.invite=netInvite(id);netRenderLobby()});
   peer.on('connection',conn=>{if(NET.closing||NET.role!=='host')return;if(NET.conn){conn.close();return}netAttachConnection(conn)});
@@ -689,7 +702,7 @@ function netJoinRoom(room,fields){
  goFS();netCleanup();NET.lastJoin={room:room,name:fields.name,pen:netSafePen(fields.pen),series:fields.series,clock:fields.clock||0,clutter:fields.clutter||0};NET.role='guest';NET.localIndex=1;NET.localName=fields.name;NET.localPen=netSafePen(fields.pen);NET.remotePen=1;NET.series=fields.series;NET.clock=fields.clock||0;NET.clutter=fields.clutter||0;NET.room=room;NET.invite=netInvite(room);
  show("<h2>Joining room…</h2><p class='mu'>Finding the host and connecting securely.</p><div class='g'><button data-a='leaveOnline'>Cancel</button></div>");
  try{
-  const peer=new Peer({debug:0});NET.peer=peer;
+  const peer=new Peer({debug:0});NET.peer=peer;netWatchPeer(peer);
   peer.on('open',()=>{if(NET.closing||NET.role!=='guest')return;const conn=peer.connect(room,{reliable:true,serialization:'json',metadata:{name:NET.localName,pen:NET.localPen}});netAttachConnection(conn)});
   peer.on('error',err=>{if(NET.closing||NET.role!=='guest')return;netError(err&&err.type==='peer-unavailable'?'Room not found or the host has left. Check the code and try again.':'Could not connect to the room service. Check your connection and try again.')});
  }catch(e){netError('This browser could not join an online room.')}
@@ -823,9 +836,21 @@ function netApplyState(s){
  hud();
  if(G.st==='over'&&NET.resultShownId!==G.id)netShowResult();
 }
+function netRecordGuestResult(){
+ const p=G&&G.pl[NET.localIndex];if(!p||!M)return;
+ const ser=M.cfg.series>1,fin=M.scores.findIndex(s=>s>=M.need),done=!ser||fin>=0,sw=fin>=0?G.pl[fin]:null,w=G.win;
+ ST.rec.unshift((ser?"R"+M.round+" · ":"")+(w?w.name+" won":"Draw")+" · "+G.pl.length+" players");
+ if(done&&ser&&sw)ST.rec.unshift("Series "+M.scores.join("–")+" · "+sw.name+" won");
+ ST.rec.length=Math.min(6,ST.rec.length);
+ ST.p++;ST.rs+=p.rank||1;ST.e+=p.el;ST.sh+=p.sh;ST.ht+=p.ht;ST.pens[p.pen]=(ST.pens[p.pen]||0)+1;
+ if(w===p){ST.w++;ST.st++;ST.bs=Math.max(ST.bs,ST.st)}else ST.st=0;
+ if(done&&ser){ST.sp++;if(sw===p)ST.sw++}
+ sv('pg.st',ST);hud();
+}
 function netShowResult(){
  if(NET.role!=='guest'||!G||!M||G.st!=='over'||NET.resultShownId===G.id)return;
  NET.resultShownId=G.id;
+ if(NET.role==='guest')netRecordGuestResult();
  const w=G.win,ser=M.cfg.series>1,fin=M.scores.findIndex(s=>s>=M.need),done=!ser||fin>=0,sw=fin>=0?G.pl[fin]:null;
  const rows=[...G.pl].sort((a,b)=>a.rank-b.rank||a.i-b.i).map(p=>"<div class='rk' style='--c:"+PC[p.i]+"'><span class='pos'>"+(w?ord(p.rank):'=')+"</span><span class='nm'>"+esc(p.name)+"</span><span class='ms'>"+p.el+" out · "+p.ht+"/"+p.sh+" hits</span></div>").join('');
  const score=ser?"<div class='score'>"+G.pl.map(p=>"<div style='--c:"+PC[p.i]+"'><b>"+M.scores[p.i]+"</b><span>"+esc(p.name)+"</span></div>").join('')+"</div>":"";
