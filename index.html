@@ -976,12 +976,14 @@ try {
  const stage=document.querySelector('#stage'),gameCanvas=document.querySelector('#c'),canvas=document.querySelector('#pen3d');
  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer.setClearColor(0x000000,0);
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
  const scene=new THREE.Scene();
  scene.add(new THREE.HemisphereLight(0xffe8ce,0x211711,1.8));
- const keyLight=new THREE.DirectionalLight(0xffd4a0,2.6);keyLight.position.set(-340,-420,520);scene.add(keyLight);
+ const keyLight=new THREE.DirectionalLight(0xffd4a0,2.6);keyLight.position.set(160,-120,750);keyLight.target.position.set(480,300,-20);keyLight.castShadow=true;keyLight.shadow.mapSize.set(1024,1024);keyLight.shadow.camera.left=-700;keyLight.shadow.camera.right=700;keyLight.shadow.camera.top=700;keyLight.shadow.camera.bottom=-700;keyLight.shadow.camera.near=1;keyLight.shadow.camera.far=2100;keyLight.shadow.bias=-.0002;keyLight.shadow.normalBias=.025;scene.add(keyLight,keyLight.target);
  const fill=new THREE.DirectionalLight(0xb4c8ef,.7);fill.position.set(360,160,300);scene.add(fill);
  const std=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(2600,2200),std(0x241d18,.96));floor.position.set(480,300,-154);floor.receiveShadow=true;scene.add(floor);
  let seed=73471;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
  const woodCanvas=document.createElement('canvas');woodCanvas.width=1024;woodCanvas.height=1024;
  const wg=woodCanvas.getContext('2d'),base=wg.createLinearGradient(0,0,1024,0);
@@ -1013,7 +1015,7 @@ try {
  for(const y of [78,522]){const a=new THREE.Mesh(new THREE.BoxGeometry(790,24,34),apronMat);a.position.set(480,y,-28);a.castShadow=true;a.receiveShadow=true;table.add(a)}
  for(const x of [105,855]){const cross=new THREE.Mesh(new THREE.BoxGeometry(28,420,28),darkWood);cross.position.set(x,300,-34);cross.castShadow=true;table.add(cross)}
  const legGeo=new THREE.BoxGeometry(30,30,140),footGeo=new THREE.BoxGeometry(34,34,9),collarGeo=new THREE.BoxGeometry(33,33,10),boltGeo=new THREE.CylinderGeometry(3,3,1.6,12);
- for(const [x,y,a] of [[78,78,-.035],[882,78,.035],[78,522,.035],[882,522,-.035]]){const g=new THREE.Group();g.position.set(x,y,-38);g.rotation.z=a;table.add(g);const leg=new THREE.Mesh(legGeo,woodSide);leg.position.z=-67;leg.castShadow=true;leg.receiveShadow=true;g.add(leg);const foot=new THREE.Mesh(footGeo,darkWood);foot.position.z=-139;foot.castShadow=true;g.add(foot);const collar=new THREE.Mesh(collarGeo,blackMetal);collar.position.z=-15;g.add(collar);const bolt=new THREE.Mesh(boltGeo,screwMat);bolt.rotation.x=Math.PI/2;bolt.position.set(0,-15,-24);g.add(bolt)}
+ for(const [x,y,a] of [[78,78,-.035],[882,78,.035],[78,522,.035],[882,522,-.035]]){const g=new THREE.Group();g.position.set(x,y,-8);g.rotation.z=a;table.add(g);const leg=new THREE.Mesh(legGeo,woodSide);leg.position.z=-67;leg.castShadow=true;leg.receiveShadow=true;g.add(leg);const foot=new THREE.Mesh(footGeo,darkWood);foot.position.z=-139;foot.castShadow=true;g.add(foot);const collar=new THREE.Mesh(collarGeo,blackMetal);collar.position.z=-15;g.add(collar);const bolt=new THREE.Mesh(boltGeo,screwMat);bolt.rotation.x=Math.PI/2;bolt.position.set(0,-15,-24);g.add(bolt)}
  const screwGeo=new THREE.CylinderGeometry(2.5,2.5,1.1,12),slotGeo=new THREE.BoxGeometry(2.8,.36,.3);
  for(let i=0;i<12;i++)for(const y of [47,553]){const x=63+i*75,s=new THREE.Mesh(screwGeo,screwMat);s.rotation.x=Math.PI/2;s.position.set(x,y,8.9);s.castShadow=true;top.add(s);const slot=new THREE.Mesh(slotGeo,blackMetal);slot.position.set(x,y,9.6);slot.rotation.z=(i%2)*.6;top.add(slot)}
  const penRoot=new THREE.Group();scene.add(penRoot);const penMeshes=new Map(),sharedGeos=[];
@@ -1024,9 +1026,12 @@ try {
  const cylinder=(g,geo,x,material)=>{const m=new THREE.Mesh(geo,material);m.rotation.z=Math.PI/2;m.position.x=x;m.castShadow=true;m.receiveShadow=true;g.add(m);return m};
  function makePen(i){const g=new THREE.Group(),m=penMats(i);cylinder(g,bodyGeo,-2,m.barrel);cylinder(g,capGeo,-23,m.cap);cylinder(g,gripGeo,17,m.grip);for(let j=0;j<6;j++)cylinder(g,ribsGeo,11.5+j*1.55,blackMetal);cylinder(g,ringGeo,-15,m.metal);cylinder(g,nibGeo,30,m.metal);cylinder(g,tipGeo,38.5,m.ink);const clip=new THREE.Mesh(clipGeo,m.metal);clip.position.set(-8,4.5,3.8);clip.castShadow=true;g.add(clip);return g}
  const disposePen=root=>root.traverse(o=>{if(o.isMesh&&o.geometry&&!sharedGeos.includes(o.geometry))o.geometry.dispose()});
- const camera=new THREE.PerspectiveCamera(37,1,1,3200);camera.position.set(480,-255,1335);camera.lookAt(480,300,0);
+ const camera=new THREE.PerspectiveCamera(32,1,1,4200);camera.up.set(0,0,1);camera.position.set(480,-400,900);camera.lookAt(480,300,0);
  let lastKey='',running=true,raf=0;
- function resize(){const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);const portrait=r.height>r.width*1.05,v=window.__penGameView?.()||{x:0,y:0,w:960,h:600},k=[Math.round(r.width),Math.round(r.height),portrait,v.x,v.y,v.w,v.h].join(':');if(k===lastKey)return;lastKey=k;window.__pen3dActive=true;canvas.style.display='block';const cr=gameCanvas.getBoundingClientRect();canvas.style.inset='auto';canvas.style.left=(cr.left-r.left)+'px';canvas.style.top=(cr.top-r.top)+'px';canvas.style.width=cr.width+'px';canvas.style.height=cr.height+'px';const aspect=cr.width/Math.max(1,cr.height);camera.aspect=aspect;camera.fov=portrait?42:37;camera.position.set(480,portrait?-300:-255,portrait?1530:1335);camera.lookAt(480,300,0);const dist=camera.position.distanceTo(new THREE.Vector3(480,300,0)),minH=portrait?650:600,visibleH=2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*dist;if(visibleH<minH){camera.position.z+=(minH-visibleH)*.7;camera.lookAt(480,300,0)}camera.updateProjectionMatrix()}
+ function resize(){const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);const portrait=r.height>r.width*1.05,v=window.__penGameView?.()||{x:0,y:0,w:960,h:600},k=[Math.round(r.width),Math.round(r.height),portrait,v.x,v.y,v.w,v.h].join(':');if(k===lastKey)return;lastKey=k;window.__pen3dActive=true;canvas.style.display='block';const cr=gameCanvas.getBoundingClientRect();canvas.style.inset='auto';canvas.style.left=(cr.left-r.left)+'px';canvas.style.top=(cr.top-r.top)+'px';canvas.style.width=cr.width+'px';canvas.style.height=cr.height+'px';const aspect=cr.width/Math.max(1,cr.height);camera.aspect=aspect;camera.fov=portrait?42:32;
+   // Rotate the viewing azimuth on portrait screens instead of squeezing a landscape desk.
+   if(portrait)camera.position.set(1480,300,1500);else camera.position.set(480,-400,900);
+   camera.lookAt(480,300,0);camera.updateProjectionMatrix()}
  window.addEventListener('resize',resize);const observer=new ResizeObserver(resize);observer.observe(stage);
  canvas.addEventListener('webglcontextlost',()=>{running=false;window.__pen3dActive=false},{passive:true});
  window.addEventListener('pagehide',()=>{running=false;cancelAnimationFrame(raf);observer.disconnect();table.traverse(o=>{if(o.isMesh&&o.geometry)o.geometry.dispose()});for(const g of sharedGeos)g.dispose();penRoot.traverse(o=>{if(o.isMesh&&o.geometry&&!sharedGeos.includes(o.geometry))o.geometry.dispose()});for(const m of matsCache.values())Object.values(m).forEach(x=>x.dispose());woodTex.dispose();wearTex.dispose();renderer.dispose()},{once:true});
