@@ -1006,7 +1006,7 @@ try {
  const camera=new THREE.OrthographicCamera(0,960,0,600,.1,3000);camera.position.set(480,300,1100);camera.lookAt(480,300,0);
  function resize(){const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);const portrait=r.height>r.width*1.05;window.__pen3dActive=!portrait;canvas.style.display=portrait?'none':'block';if(!portrait){const cr=gameCanvas.getBoundingClientRect();canvas.style.inset='auto';canvas.style.left=(cr.left-r.left)+'px';canvas.style.top=(cr.top-r.top)+'px';canvas.style.width=cr.width+'px';canvas.style.height=cr.height+'px';const v=window.__penGameView?.()||{x:0,y:0,w:960,h:600};camera.left=v.x;camera.right=v.x+v.w;camera.top=v.y;camera.bottom=v.y+v.h;camera.updateProjectionMatrix()}}
  window.addEventListener('resize',resize);new ResizeObserver(resize).observe(stage);
- function animate(){requestAnimationFrame(animate);resize();const states=window.__pen3dSnapshot?.()||[];for(const p of states){let mesh=penMeshes.get(p.id);if(!mesh){mesh=makePen(p.pen);penRoot.add(mesh);penMeshes.set(p.id,mesh)}mesh.visible=p.alive||p.fell;mesh.position.set(p.x,p.y,13+p.z);mesh.rotation.set(0,0,-p.angle);mesh.scale.set(1,1,1);if(p.fell)mesh.visible=false}
+ function animate(){requestAnimationFrame(animate);resize();const states=window.__pen3dSnapshot?.()||[];for(const p of states){let mesh=penMeshes.get(p.id);if(!mesh){mesh=makePen(p.pen);penRoot.add(mesh);penMeshes.set(p.id,mesh)}mesh.visible=p.alive||p.fell;mesh.position.set(p.x,600-p.y,13+p.z);mesh.rotation.set(0,0,-p.angle);mesh.scale.set(1,1,1);if(p.fell)mesh.visible=false}
  renderer.render(scene,camera)}animate();
 }catch(e){console.warn('3D environment unavailable; using procedural fallback.',e);window.__pen3dActive=false}
 </script>
