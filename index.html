@@ -658,11 +658,12 @@ function netFields(){
 function netCleanup(){
  NET.closing=true;
  if(NET.syncTimer)clearInterval(NET.syncTimer);
- NET.syncTimer=0;
+ if(NET.connectionTimer)clearTimeout(NET.connectionTimer);
+ NET.syncTimer=0;NET.connectionTimer=0;
  const conn=NET.conn,peer=NET.peer;NET.conn=null;NET.peer=null;
  try{if(conn)conn.close()}catch(e){}
  try{if(peer&&!peer.destroyed)peer.destroy()}catch(e){}
- Object.assign(NET,{role:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,localIndex:0,started:false,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,trails:[]});
+ Object.assign(NET,{role:null,connected:false,room:'',invite:'',localName:'Player',remoteName:'Opponent',localPen:0,remotePen:1,series:1,clock:0,clutter:0,localIndex:0,started:false,seq:0,lastSeq:0,lastGameId:null,resultShownId:null,trails:[]});
  NET.closing=false;
 }
 function netError(message){
@@ -671,12 +672,13 @@ function netError(message){
 }
 function netCreateRoom(fields){
  if(typeof Peer==='undefined'){netError('The peer connection library could not load. Refresh the page and try again.');return}
- netCleanup();NET.role='host';NET.localIndex=0;NET.localName=fields.name;NET.localPen=fields.pen;NET.series=fields.series;
+ netCleanup();NET.lastJoin=null;NET.role='host';NET.localIndex=0;NET.localName=fields.name;NET.localPen=netSafePen(fields.pen);NET.series=fields.series;NET.clock=fields.clock||0;NET.clutter=fields.clutter||0;
  show("<h2>Creating room…</h2><p class='mu'>Connecting to the room service.</p><div class='g'><button data-a='leaveOnline'>Cancel</button></div>");
  try{
   const peer=new Peer(netCode(),{debug:0});NET.peer=peer;
-  peer.on('open',id=>{if(NET.closing||NET.role!=='host')return;NET.room=id;NET.invite=netInvite(id);netRenderLobby()});
-  peer.on('connection',conn=>{if(NET.closing||NET.role!=='host')return;if(NET.conn&&NET.connected){conn.close();return}netAttachConnection(conn)});
+  NET.connectionTimer=setTimeout(()=>{if(NET.role==='host'&&!NET.room)netError('Room creation timed out. Check your connection and try again.')},18000);
+  peer.on('open',id=>{if(NET.closing||NET.role!=='host')return;if(NET.connectionTimer)clearTimeout(NET.connectionTimer);NET.connectionTimer=0;NET.room=id;NET.invite=netInvite(id);netRenderLobby()});
+  peer.on('connection',conn=>{if(NET.closing||NET.role!=='host')return;if(NET.conn){conn.close();return}netAttachConnection(conn)});
   peer.on('error',err=>{if(NET.closing||NET.role!=='host')return;netError(err&&err.type==='unavailable-id'?'That room code is already in use. Please create another room.':'Unable to create the room. Check your internet connection and try again.')});
  }catch(e){netError('This browser could not start an online room.')}
 }
@@ -684,7 +686,7 @@ function netJoinRoom(room,fields){
  room=String(room||'').trim();
  if(!/^[a-zA-Z0-9_-]{4,80}$/.test(room)){toast('Enter a valid room code');return}
  if(typeof Peer==='undefined'){netError('The peer connection library could not load. Refresh the page and try again.');return}
- goFS();netCleanup();NET.role='guest';NET.localIndex=1;NET.localName=fields.name;NET.localPen=fields.pen;NET.remotePen=1;NET.series=fields.series;NET.room=room;NET.invite=netInvite(room);
+ goFS();netCleanup();NET.lastJoin={room:room,name:fields.name,pen:netSafePen(fields.pen),series:fields.series,clock:fields.clock||0,clutter:fields.clutter||0};NET.role='guest';NET.localIndex=1;NET.localName=fields.name;NET.localPen=netSafePen(fields.pen);NET.remotePen=1;NET.series=fields.series;NET.clock=fields.clock||0;NET.clutter=fields.clutter||0;NET.room=room;NET.invite=netInvite(room);
  show("<h2>Joining room…</h2><p class='mu'>Finding the host and connecting securely.</p><div class='g'><button data-a='leaveOnline'>Cancel</button></div>");
  try{
   const peer=new Peer({debug:0});NET.peer=peer;
@@ -694,10 +696,18 @@ function netJoinRoom(room,fields){
 }
 function netAttachConnection(conn){
  NET.conn=conn;
+ NET.connectionTimer=setTimeout(()=>{
+  if(NET.closing||NET.conn!==conn||NET.connected)return;
+  NET.connectionTimer=0;
+  try{conn.close()}catch(e){}
+  if(NET.role==='host'){NET.conn=null;NET.connected=false;netRenderLobby();toast('Connection timed out. Room is still open.')}
+  else netGuestDisconnected('Connection timed out. Check the network and reconnect to this room.');
+ },20000);
  conn.on('open',()=>{
   if(NET.closing||NET.conn!==conn)return;
+  if(NET.connectionTimer)clearTimeout(NET.connectionTimer);NET.connectionTimer=0;
   NET.connected=true;
-  if(NET.role==='guest')netSend({type:'hello',name:NET.localName,pen:NET.localPen});
+  if(NET.role==='guest')netSend({type:'hello',name:NET.localName,pen:NET.localPen,series:NET.series,clock:NET.clock,clutter:NET.clutter});
   else{NET.remoteName=String(conn.metadata?.name||'Opponent').slice(0,14);NET.remotePen=netSafePen(conn.metadata?.pen??1);netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,hostPen:NET.localPen,guestPen:NET.remotePen,started:NET.started})}
   if(NET.role==='host')netRenderLobby();
  });
@@ -718,6 +728,7 @@ function netRenderLobby(){
  show("<div class='logo'><b>Room <span>"+(host?'created':'joined')+"</span></b></div>"+
   "<div class='st'><div><b>"+(host?esc(NET.localName):esc(NET.remoteName))+"</b><span>"+esc((PENS[host?NET.localPen:NET.remotePen]||PENS[0]).n)+"</span></div><div><b>"+(host?(connected?esc(NET.remoteName):'Waiting…'):esc(NET.localName))+"</b><span>"+(host?(connected?esc((PENS[NET.remotePen]||PENS[0]).n):'Choose a pen on their device'):esc((PENS[NET.localPen]||PENS[0]).n))+"</span></div><div><b>"+(connected?'● Online':'…')+"</b><span>Connection</span></div></div>"+
   inviteTools+
+  "<p class='mu'>Room rules: "+esc((SERIES.find(x=>x[0]===NET.series)||SERIES[0])[1])+" · Shot clock "+esc((CLOCKS.find(x=>x[0]===NET.clock)||CLOCKS[0])[1])+" · "+esc((CLUTTER.find(x=>x[0]===NET.clutter)||CLUTTER[0])[1])+" obstacles. The host's rules are used.</p>"+
   "<div class='g2'><button data-a='leaveOnline'>Leave room</button>"+(host?"<button class='pr' data-a='startOnline' "+(connected?'':'disabled')+">Start match</button>":"<button disabled>Waiting for host…</button>")+"</div>"+
   (host&&!connected?"<p class='mu'>Keep this screen open while your friend joins. Start match will unlock when they connect.</p>":""));
  if(host){
@@ -743,7 +754,7 @@ function netCopy(value){
 }
 function netStartMatch(){
  if(NET.role!=='host'||!NET.connected||!NET.conn)return;
- const conf=normCfg({series:NET.series,clock:0,clutter:0,pl:[
+ const conf=normCfg({series:NET.series,clock:NET.clock,clutter:NET.clutter,pl:[
   {name:NET.localName,ai:0,pen:NET.localPen},
   {name:NET.remoteName||'Opponent',ai:0,pen:NET.remotePen}
  ]});
