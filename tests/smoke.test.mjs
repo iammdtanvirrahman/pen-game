@@ -7,10 +7,9 @@ import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const html = readFileSync(path.join(root, "index.html"), "utf8");
-const manifestText = readFileSync(path.join(root, "manifest.webmanifest"), "utf8");
+const manifest = JSON.parse(readFileSync(path.join(root, "manifest.webmanifest"), "utf8"));
 const worker = readFileSync(path.join(root, "sw.js"), "utf8");
-const manifest = JSON.parse(manifestText);
-const inlineScript = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/gi)]
+const inlineScript = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)]
   .map((match) => match[1])
   .find((code) => code.includes("const {Engine,Bodies,Body,Composite,Events}=Matter"));
 
@@ -50,7 +49,7 @@ test("online matches advertise the host-selected rules", () => {
   assert.match(inlineScript, /PENS\.slice\(0,BUILTIN\)/);
 });
 
-test("offline shell fallback exists but does not pretend online is offline", () => {
+test("offline shell fallback exists but online still needs a network", () => {
   assert.match(worker, /caches\.match\(key\)/);
   assert.match(worker, /peerjs/i);
   assert.match(worker, /Online multiplayer still requires the internet/);
