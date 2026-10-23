@@ -680,7 +680,7 @@ function netAttachConnection(conn){
   if(NET.closing||NET.conn!==conn)return;
   NET.connected=true;
   if(NET.role==='guest')netSend({type:'hello',name:NET.localName,pen:NET.localPen});
-  else{NET.remoteName=String(conn.metadata?.name||'Opponent').slice(0,14);NET.remotePen=netSafePen(conn.metadata?.pen??1);netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,started:NET.started})}
+  else{NET.remoteName=String(conn.metadata?.name||'Opponent').slice(0,14);NET.remotePen=netSafePen(conn.metadata?.pen??1);netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,hostPen:NET.localPen,guestPen:NET.remotePen,started:NET.started})}
   if(NET.role==='host')netRenderLobby();
  });
  conn.on('data',message=>netHandleMessage(message));
