@@ -154,6 +154,19 @@ html body{padding:0;gap:0}
 #clk{min-width:34px;height:24px;padding:0 8px;font-size:12px;border-color:transparent;background:rgba(10,10,12,.45);top:calc(6px + env(safe-area-inset-top,0px))}
 body.play #toast,body.hudon #toast{top:calc(38px + env(safe-area-inset-top,0px));font-size:12px;padding:4px 12px;background:rgba(14,14,17,.6);border-color:transparent;box-shadow:none}
 body.fs #top{display:none!important}
+
+/* Friendlier room sharing */
+.invite-layout{display:grid;grid-template-columns:minmax(0,1fr) 142px;align-items:center;gap:14px;margin:14px 0;padding:14px;background:#141418;border:1px solid var(--ln);border-radius:14px}
+.invite-actions{display:grid;gap:8px;min-width:0}
+.invite-actions h3{margin:0!important}
+.invite-actions p{margin:0 0 4px}
+.invite-actions button{width:100%;padding:10px;font-size:14px}
+.invite-code{font-size:clamp(13px,2.5vw,17px);font-weight:700;letter-spacing:.02em;overflow-wrap:anywhere;padding:8px 10px;background:#0b0b0d;border:1px solid var(--ln);border-radius:9px}
+.invite-qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0}
+.invite-qr{width:136px;height:136px;display:grid;place-items:center;background:#fff;border:5px solid #fff;border-radius:10px;overflow:hidden}
+.invite-qr img,.invite-qr canvas{display:block;max-width:100%;height:auto}
+.invite-qr-wrap span{font-size:11px;line-height:1.3;text-align:center;color:var(--mu)}
+@media(max-width:430px){.invite-layout{grid-template-columns:minmax(0,1fr) 112px;gap:8px;padding:9px}.invite-qr{width:108px;height:108px;border-width:4px}.invite-actions button{font-size:12px;padding:8px 5px}.invite-code{font-size:12px;padding:7px}}
 </style>
 
 <div id="top">
@@ -171,6 +184,7 @@ body.fs #top{display:none!important}
 <div id="scr"></div><div id="toast" role="status"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (()=>{
 const {Engine,Bodies,Body,Composite,Events}=Matter;
@@ -599,7 +613,8 @@ function netOnlineMenu(){
   "<div class='player-fields'><label>Your name<input id='netname' type='text' maxlength='14' value='Player' placeholder='Your name'></label><label>Your pen<select id='netpen'>"+penOptions+"</select></label></div>"+
   "<label>Series<select id='netseries'>"+seriesOptions+"</select></label>"+
   "<label>Room code<input id='netroom' type='text' autocomplete='off' autocapitalize='none' spellcheck='false' value='"+esc(room)+"' placeholder='Paste the room code'></label>"+
-  "<div class='g2'><button class='pr' data-a='createRoom'>Create room</button><button data-a='joinRoom'>Join room</button></div>"+
+  "<div class='g2'><button class='"+(room?'':'pr')+"' data-a='createRoom'>Create room</button><button class='"+(room?'pr':'')+"' data-a='joinRoom'>"+(room?'Join this room →':'Join room')+"</button></div>"+
+  (room?"<p class='mu'>Invite link detected — your room code is already filled in. Choose your name and pen, then tap Join this room.</p>":"")+
   "<div class='g'><button data-a='menu'>Back to main menu</button></div><p class='mu'>Requires internet and a browser with WebRTC support.</p>");
  const saved=ld('pg.net',{name:'Player',pen:0});
  const name=$('#netname');if(name)name.value=saved.name||'Player';
@@ -669,11 +684,30 @@ function netAttachConnection(conn){
 function netRenderLobby(){
  if(!NET.role)return;
  const host=NET.role==='host',connected=!!NET.connected;
+ const inviteTools=host
+  ? "<div class='invite-layout'><div class='invite-actions'><h3>Invite a friend</h3><p class='mu'>Easiest: share the link or let your friend scan the QR with their phone camera.</p><button class='pr' data-a='shareInvite'>Share invite ↗</button><button data-a='copyInvite'>Copy invite link</button><button data-a='copyRoom'>Copy room code</button><div class='invite-code'>"+esc(NET.room)+"</div></div><div class='invite-qr-wrap'><div id='roomqr' class='invite-qr' aria-label='Room invite QR code'></div><span>Scan using the other phone</span></div></div>"
+  : "<p class='mu'>You're connected to the host. The host will start the match.</p><div class='rk'><span class='nm'>Room code</span><strong>"+esc(NET.room)+"</strong></div>";
  show("<div class='logo'><b>Room <span>"+(host?'created':'joined')+"</span></b></div>"+
-  "<div class='st'><div><b>"+(host?esc(NET.localName):esc(NET.remoteName))+"</b><span>Host</span></div><div><b>"+(host?(connected?esc(NET.remoteName):'Waiting…'):esc(NET.localName))+"</b><span>"+(host?(connected?'Opponent connected':'Opponent'):'You')+"</span></div><div><b>"+(connected?'● Online':'…')+"</b><span>Connection</span></div></div>"+
-  (host?"<h3>Invite a friend</h3><p class='mu'>Send this room code or invite link to one friend.</p><div class='rk'><span class='nm'>Room code</span><strong>"+esc(NET.room)+"</strong></div><label>Invite link<input id='netinvite' type='text' readonly value='"+esc(NET.invite)+"'></label><div class='g2'><button data-a='copyRoom'>Copy room code</button><button data-a='copyInvite'>Copy invite link</button></div>":"<p class='mu'>You're connected to the host. The match will begin when the host starts it.</p><div class='rk'><span class='nm'>Room code</span><strong>"+esc(NET.room)+"</strong></div>")+
+  "<div class='st'><div><b>"+(host?esc(NET.localName):esc(NET.remoteName))+"</b><span>Host</span></div><div><b>"+(host?(connected?esc(NET.remoteName):'Waiting…'):esc(NET.localName))+"</b><span>"+(host?(connected?'Opponent connected':'Waiting for friend'):'You')+"</span></div><div><b>"+(connected?'● Online':'…')+"</b><span>Connection</span></div></div>"+
+  inviteTools+
   "<div class='g2'><button data-a='leaveOnline'>Leave room</button>"+(host?"<button class='pr' data-a='startOnline' "+(connected?'':'disabled')+">Start match</button>":"<button disabled>Waiting for host…</button>")+"</div>"+
-  (host&&!connected?"<p class='mu'>Keep this page open while your friend joins.</p>":""));
+  (host&&!connected?"<p class='mu'>Keep this screen open while your friend joins. Start match will unlock when they connect.</p>":""));
+ if(host){
+  const box=$('#roomqr');
+  if(box){
+   if(typeof QRCode!=='undefined'){
+    try{new QRCode(box,{text:NET.invite,width:136,height:136,colorDark:'#101013',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}
+    catch(e){box.textContent='QR unavailable'}
+   }else box.textContent='QR unavailable';
+  }
+ }
+}
+function netShareInvite(){
+ if(!NET.invite){toast('Create a room first');return}
+ const data={title:'Join my Pen Game match',text:'Let’s play Pen Game! Open this invite link to join my room.',url:NET.invite};
+ if(navigator.share){
+  navigator.share(data).then(()=>toast('Invite ready to share')).catch(err=>{if(!err||err.name!=='AbortError')netCopy(NET.invite)});
+ }else netCopy(NET.invite);
 }
 function netCopy(value){
  const fallback=()=>{const x=document.createElement('textarea');x.value=value;x.style.position='fixed';x.style.opacity='0';document.body.appendChild(x);x.select();try{document.execCommand('copy');toast('Copied to clipboard')}catch(e){window.prompt('Copy this text:',value)}x.remove()};
@@ -802,7 +836,7 @@ function netHandleMessage(message){
 let rsT=0;
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const d=a.dataset,f={
  setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,online:netOnlineMenu,menu:()=>NET.role?netLeave():menu(),pause:()=>{if(NET.role==='guest'){toast('Only the host can pause this match');return}pz()},res:resume,
- createRoom:()=>{const f=netFields();netCreateRoom(f)},joinRoom:()=>{const f=netFields();netJoinRoom($('#netroom')?.value,f)},startOnline:netStartMatch,leaveOnline:netLeave,copyRoom:()=>netCopy(NET.room),copyInvite:()=>netCopy(NET.invite),
+ createRoom:()=>{const f=netFields();netCreateRoom(f)},joinRoom:()=>{const f=netFields();netJoinRoom($('#netroom')?.value,f)},startOnline:netStartMatch,leaveOnline:netLeave,copyRoom:()=>netCopy(NET.room),copyInvite:()=>netCopy(NET.invite),shareInvite:netShareInvite,
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
  target:()=>{setupTarget=+d.v;setupUI(true)},
  choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+d.v;setupUI(true)},
