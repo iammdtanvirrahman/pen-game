@@ -394,7 +394,7 @@ cv.addEventListener('pointerdown',e=>{if(!G||paused||G.st!=='aim')return;const p
  const t=clamp((q.x-b.x)*c+(q.y-b.y)*s,-PL/2,PL/2);if(Math.hypot(q.x-(b.x+c*t),q.y-(b.y+s*t))>Math.min(90,Math.max(36,44/cs)))return;drag={x:q.x,y:q.y,t};cv.setPointerCapture(e.pointerId);e.preventDefault()});
 cv.addEventListener('pointermove',e=>{if(drag){const q=pt(e);drag.x=q.x;drag.y=q.y}});
 cv.addEventListener('pointerup',e=>{if(!drag||!G||G.st!=='aim'){drag=null;return}const c=cpOf(G.pl[G.t].body,drag.t),q=pt(e),vx=c.x-q.x,vy=c.y-q.y,l=Math.hypot(vx,vy);
- if(l<minD()){drag=null;return}const ang=Math.atan2(vy,vx),pw=Math.min(l,maxD())/maxD(),offset=drag.t;if(NET.role==='guest'){netSend({type:'flick',player:NET.localIndex,ang,pw,t:offset});drag=null;return}flick(ang,pw,offset)});
+ if(l<minD()){drag=null;return}const ang=Math.atan2(vy,vx),pw=Math.min(l,maxD())/maxD(),offset=drag.t;if(NET.role==='guest'){netSend({type:'flick',player:NET.localIndex,dirX:Math.cos(ang)/B.w,dirY:Math.sin(ang)/B.h,pw,t:offset});drag=null;return}flick(ang,pw,offset)});
 cv.addEventListener('pointercancel',()=>{drag=null});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('resize',rs);
@@ -634,19 +634,19 @@ function netCreateRoom(fields){
   const peer=new Peer(netCode(),{debug:0});NET.peer=peer;
   peer.on('open',id=>{if(NET.closing||NET.role!=='host')return;NET.room=id;NET.invite=netInvite(id);netRenderLobby()});
   peer.on('connection',conn=>{if(NET.closing||NET.role!=='host')return;if(NET.conn&&NET.connected){conn.close();return}netAttachConnection(conn)});
-  peer.on('error',err=>{if(NET.closing)return;netError(err&&err.type==='unavailable-id'?'That room code is already in use. Please create another room.':'Unable to create the room. Check your internet connection and try again.')});
+  peer.on('error',err=>{if(NET.closing||NET.role!=='host')return;netError(err&&err.type==='unavailable-id'?'That room code is already in use. Please create another room.':'Unable to create the room. Check your internet connection and try again.')});
  }catch(e){netError('This browser could not start an online room.')}
 }
 function netJoinRoom(room,fields){
  room=String(room||'').trim();
  if(!/^[a-zA-Z0-9_-]{4,80}$/.test(room)){toast('Enter a valid room code');return}
  if(typeof Peer==='undefined'){netError('The peer connection library could not load. Refresh the page and try again.');return}
- netCleanup();NET.role='guest';NET.localIndex=1;NET.localName=fields.name;NET.localPen=fields.pen;NET.remotePen=1;NET.series=fields.series;NET.room=room;NET.invite=netInvite(room);
+ goFS();netCleanup();NET.role='guest';NET.localIndex=1;NET.localName=fields.name;NET.localPen=fields.pen;NET.remotePen=1;NET.series=fields.series;NET.room=room;NET.invite=netInvite(room);
  show("<h2>Joining room…</h2><p class='mu'>Finding the host and connecting securely.</p><div class='g'><button data-a='leaveOnline'>Cancel</button></div>");
  try{
   const peer=new Peer({debug:0});NET.peer=peer;
   peer.on('open',()=>{if(NET.closing||NET.role!=='guest')return;const conn=peer.connect(room,{reliable:true,serialization:'json',metadata:{name:NET.localName,pen:NET.localPen}});netAttachConnection(conn)});
-  peer.on('error',err=>{if(NET.closing)return;netError(err&&err.type==='peer-unavailable'?'Room not found or the host has left. Check the code and try again.':'Could not connect to the room service. Check your connection and try again.')});
+  peer.on('error',err=>{if(NET.closing||NET.role!=='guest')return;netError(err&&err.type==='peer-unavailable'?'Room not found or the host has left. Check the code and try again.':'Could not connect to the room service. Check your connection and try again.')});
  }catch(e){netError('This browser could not join an online room.')}
 }
 function netAttachConnection(conn){
@@ -689,14 +689,14 @@ function netStartMatch(){
  goFS();begin(conf);NET.lastGameId=G.id;hide();
  netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,started:true});
  if(NET.syncTimer)clearInterval(NET.syncTimer);
- NET.syncTimer=setInterval(netBroadcastState,75);netBroadcastState();
+ NET.syncTimer=setInterval(netBroadcastState,50);netBroadcastState();
 }
 function netPackState(){
  if(!G||!M)return null;
  return{type:'state',seq:++NET.seq,cfg:M.cfg,match:{scores:M.scores,round:M.round,need:M.need,first:M.first},game:{
   id:G.id,t:G.t,st:G.st,simT:G.simT,sT:G.sT,clk:G.clk,cs:G.cs,hit:G.hit,win:G.win?G.win.i:null,
-  pl:G.pl.map(p=>{const b=p.body;return{i:p.i,name:p.name,alive:p.alive,fell:p.fell,rank:p.rank,el:p.el,sh:p.sh,ht:p.ht,x:b.position.x/W,y:b.position.y/H,vx:b.velocity.x/W,vy:b.velocity.y/H,angle:b.angle,av:b.angularVelocity,z:p.z,vz:p.vz,pt:p.pt,pw:p.pw,rb:p.rb,fl:p.fl,mask:b.collisionFilter.mask}}),
-  obs:G.obs.map(o=>({k:o.k,x:o.x/W,y:o.y/H,a:o.a,w:o.w,h:o.h,r:o.r}))
+  pl:G.pl.map(p=>{const b=p.body;return{i:p.i,name:p.name,alive:p.alive,fell:p.fell,rank:p.rank,el:p.el,sh:p.sh,ht:p.ht,x:(b.position.x-B.x)/B.w,y:(b.position.y-B.y)/B.h,vx:b.velocity.x/B.w,vy:b.velocity.y/B.h,angle:b.angle,av:b.angularVelocity,z:p.z,vz:p.vz,pt:p.pt,pw:p.pw,rb:p.rb,fl:p.fl,mask:b.collisionFilter.mask}}),
+  obs:G.obs.map(o=>({k:o.k,x:(o.x-B.x)/B.w,y:(o.y-B.y)/B.h,a:o.a,w:o.w,h:o.h,r:o.r}))
  }};
 }
 function netBroadcastState(){
@@ -723,8 +723,8 @@ function netApplyState(s){
   const p=G.pl[d.i];if(!p)continue;const b=p.body,wasFell=p.fell;
   p.name=String(d.name||p.name).slice(0,14);p.alive=!!d.alive;p.fell=!!d.fell;p.rank=+d.rank||0;p.el=+d.el||0;p.sh=+d.sh||0;p.ht=+d.ht||0;p.z=+d.z||0;p.vz=+d.vz||0;p.pt=+d.pt||0;p.pw=+d.pw||0;p.rb=+d.rb||0;p.fl=+d.fl||0;
   if(p.fell&&!wasFell)p.ft=performance.now();
-  Body.setPosition(b,{x:(+d.x||0)*W,y:(+d.y||0)*H});Body.setAngle(b,+d.angle||0);
-  Body.setVelocity(b,{x:(+d.vx||0)*W,y:(+d.vy||0)*H});Body.setAngularVelocity(b,+d.av||0);
+  Body.setPosition(b,{x:B.x+(+d.x||0)*B.w,y:B.y+(+d.y||0)*B.h});Body.setAngle(b,+d.angle||0);
+  Body.setVelocity(b,{x:(+d.vx||0)*B.w,y:(+d.vy||0)*B.h});Body.setAngularVelocity(b,+d.av||0);
   b.collisionFilter.mask=Number.isFinite(+d.mask)?+d.mask:(p.fell?0:p.m0);
   const inWorld=Composite.allBodies(eng.world).includes(b);
   if(p.alive&&!inWorld)Composite.add(eng.world,b);else if(!p.alive&&inWorld)Composite.remove(eng.world,b);
@@ -733,7 +733,7 @@ function netApplyState(s){
  G.obs.length=0;
  for(const o of s.game.obs||[]){
   const D=OBS[o.k];if(!D)continue;
-  const q={k:o.k,x:o.x*W,y:o.y*H,a:o.a,w:D.w||0,h:D.h||0,r:D.r||0,n:D.n||D.k};
+  const q={k:o.k,x:B.x+o.x*B.w,y:B.y+o.y*B.h,a:o.a,w:D.w||0,h:D.h||0,r:D.r||0,n:D.n||D.k};
   q.body=q.r?Bodies.circle(q.x,q.y,q.r,{isStatic:true,restitution:.6,friction:0,label:'obs'}):Bodies.rectangle(q.x,q.y,q.w,q.h,{isStatic:true,angle:q.a,chamfer:{radius:4},restitution:.6,friction:0,label:'obs'});
   q.sp=obsSprite(q);G.obs.push(q);
   if(!Composite.allBodies(eng.world).includes(q.body))Composite.add(eng.world,q.body);
@@ -777,8 +777,8 @@ function netHandleMessage(message){
    netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,started:NET.started});
    if(NET.started)netBroadcastState();else netRenderLobby();return;
   }
-  if(message.type==='flick'&&NET.started&&G&&G.st==='aim'&&G.t===1&&+message.player===1&&Number.isFinite(+message.ang)&&Number.isFinite(+message.pw)){
-   flick(+message.ang,clamp(+message.pw,0,1),clamp(+message.t||0,-PL/2,PL/2));return;
+  if(message.type==='flick'&&NET.started&&!paused&&G&&G.st==='aim'&&G.t===1&&+message.player===1&&Number.isFinite(+message.dirX)&&Number.isFinite(+message.dirY)&&Number.isFinite(+message.pw)){
+   const ang=Math.atan2(+message.dirY*B.h,+message.dirX*B.w);flick(ang,clamp(+message.pw,0,1),clamp(+message.t||0,-PL/2,PL/2));return;
   }
   if(message.type==='action'&&G&&NET.started){
    if(message.action==='next'&&G.st==='over'){hide();M.round++;round();netBroadcastState()}
