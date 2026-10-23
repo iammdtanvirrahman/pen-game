@@ -26,7 +26,7 @@ test("3D desk uses perspective and synchronized Matter coordinates", () => {
   const threeModule = html.slice(html.lastIndexOf('<script type="module">'));
   assert.ok(threeModule.includes("PerspectiveCamera"));
   assert.ok(threeModule.includes("window.__pen3dActive=true"));
-  assert.ok(threeModule.includes("mesh.position.set(p.x,600-p.y,13"));
+  assert.ok(threeModule.includes("m.position.set(p.x,600-p.y,13"));
   assert.ok(threeModule.includes("BoxGeometry(880,520,18"));
   assert.ok(threeModule.includes("webglcontextlost"));
 });
