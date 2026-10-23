@@ -22,6 +22,15 @@ test("service worker parses without syntax errors", () => {
   assert.doesNotThrow(() => new Script(worker, { filename: "sw.js" }));
 });
 
+test("3D desk uses perspective and synchronized Matter coordinates", () => {
+  const threeModule = html.slice(html.lastIndexOf('<script type="module">'));
+  assert.match(threeModule, /PerspectiveCamera/);
+  assert.match(threeModule, /window\\.__pen3dActive=true/);
+  assert.match(threeModule, /mesh\\.position\\.set\\(p\\.x,600-p\\.y,13/);
+  assert.match(threeModule, /880,520,18/);
+  assert.match(threeModule, /webglcontextlost/);
+});
+
 test("PWA manifest is valid and scoped to the app", () => {
   assert.equal(manifest.start_url, "./");
   assert.equal(manifest.scope, "./");
