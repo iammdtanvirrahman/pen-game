@@ -178,6 +178,14 @@ button{min-height:44px}
  button,select,input[type=text],.seg button{min-height:44px}
  #c{touch-action:none}
 }
+
+/* True fullscreen gameplay: remove the entire HUD and let the table own the viewport. */
+html:fullscreen,html:fullscreen body{width:100vw;height:100%;height:100dvh;min-height:0;margin:0;overflow:hidden}
+html:fullscreen body{display:block;padding:0!important;gap:0!important}
+html:fullscreen #top{display:none!important}
+html:fullscreen #stage{position:fixed;inset:0;width:100vw;height:100%;height:100dvh;min-width:0;min-height:0;margin:0;padding:0;overflow:hidden;flex:none}
+html:fullscreen #c{max-width:none;max-height:none;border-radius:0}
+html:fullscreen #toast{display:none!important}
 </style>
 
 <div id="top">
