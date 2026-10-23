@@ -783,7 +783,16 @@ function netPaintTrail(p){
 }
 function netApplyState(s){
  if(NET.role!=='guest'||!s||s.type!=='state'||!s.game||!s.match)return;
- if(+s.seq<=NET.lastSeq)return;NET.lastSeq=+s.seq||NET.lastSeq+1;
+ // Validate host snapshots before mutating physics objects or rendering UI.
+ if(!Number.isSafeInteger(+s.seq)||+s.seq<1||!Array.isArray(s.game.pl)||s.game.pl.length!==2||
+    !Array.isArray(s.game.obs)||s.game.obs.length>10||!Array.isArray(s.match.scores)||s.match.scores.length!==2||
+    !['aim','sim','over'].includes(s.game.st)||!Number.isInteger(+s.game.t)||+s.game.t<0||+s.game.t>1)return;
+ for(const p of s.game.pl){
+  if(!p||!Number.isInteger(+p.i)||+p.i<0||+p.i>1||
+     !['x','y','vx','vy','angle','av'].every(k=>Number.isFinite(+p[k]))||
+     Math.abs(+p.x)>3||Math.abs(+p.y)>3||Math.abs(+p.vx)>5||Math.abs(+p.vy)>5)return;
+ }
+ if(+s.seq<=NET.lastSeq)return;NET.lastSeq=+s.seq;
  const fresh=!G||!M||NET.lastGameId!==s.game.id,incomingCfg=normCfg(s.cfg);
  if(fresh){
   hide();M={cfg:incomingCfg,scores:[...(s.match.scores||[0,0])],round:+s.match.round||1,need:+s.match.need||1,first:(s.match.first===1?1:0)};
@@ -832,8 +841,14 @@ function netHostOpponentLeft(){
 }
 function netGuestDisconnected(message){
  if(NET.closing||NET.role!=='guest')return;
+ const canRetry=!!(NET.lastJoin&&NET.lastJoin.room);
  netCleanup();G=null;M=null;paused=false;hud();
- show("<h2>Connection lost</h2><p class='mu'>"+esc(message||'The host disconnected.')+"</p><div class='g'><button class='pr' data-a='menu'>Back to main menu</button></div>");
+ show("<h2>Connection lost</h2><p class='mu'>"+esc(message||'The host disconnected.')+"</p><p class='mu'>Reconnect works while the host's room is still open. If the host left, ask them to create a new room.</p><div class='g'>"+(canRetry?"<button class='pr' data-a='reconnectOnline'>Reconnect to room</button>":"")+"<button data-a='online'>Join another room</button><button data-a='menu'>Back to main menu</button></div>");
+}
+function netReconnect(){
+ const last=NET.lastJoin;
+ if(!last||!last.room){netOnlineMenu();return}
+ netJoinRoom(last.room,last);
 }
 function netLeave(){
  const role=NET.role;if(!role){menu();return}
@@ -842,7 +857,7 @@ function netLeave(){
  netCleanup();G=null;M=null;paused=false;hud();menu();
 }
 function netHandleMessage(message){
- if(!message||typeof message!=='object'||!NET.role)return;
+ if(!message||typeof message!=='object'||Array.isArray(message)||!NET.role)return;
  if(NET.role==='host'){
   if(message.type==='hello'){
    NET.remoteName=String(message.name||(NET.conn&&NET.conn.metadata&&NET.conn.metadata.name)||'Opponent').trim().slice(0,14)||'Opponent';
@@ -850,7 +865,7 @@ function netHandleMessage(message){
    netSend({type:'lobby',host:NET.localName,guest:NET.remoteName,hostPen:NET.localPen,guestPen:NET.remotePen,started:NET.started});
    if(NET.started)netBroadcastState();else netRenderLobby();return;
   }
-  if(message.type==='flick'&&NET.started&&!paused&&G&&G.st==='aim'&&G.t===1&&+message.player===1&&Number.isFinite(+message.dirX)&&Number.isFinite(+message.dirY)&&Number.isFinite(+message.pw)){
+  if(message.type==='flick'&&NET.started&&!paused&&G&&G.st==='aim'&&G.t===1&&+message.player===1&&Number.isFinite(+message.dirX)&&Number.isFinite(+message.dirY)&&Math.abs(+message.dirX)<=1.01&&Math.abs(+message.dirY)<=1.01&&Number.isFinite(+message.pw)&&+message.pw>=0&&+message.pw<=1&&Number.isFinite(+message.t)&&Math.abs(+message.t)<=PL){
    const ang=Math.atan2(+message.dirY*B.h,+message.dirX*B.w);flick(ang,clamp(+message.pw,0,1),clamp(+message.t||0,-PL/2,PL/2));return;
   }
   if(message.type==='action'&&G&&NET.started){
@@ -875,7 +890,7 @@ function netHandleMessage(message){
 let rsT=0;
 document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const d=a.dataset,f={
  setup:()=>setup(0),prac:()=>setup(1),rules,set:sett,online:netOnlineMenu,netChoosePen:()=>netChoosePen(d.v),menu:()=>NET.role?netLeave():menu(),pause:()=>{if(NET.role==='guest'){toast('Only the host can pause this match');return}pz()},res:resume,
- createRoom:()=>{const f=netFields();netCreateRoom(f)},joinRoom:()=>{const f=netFields();netJoinRoom($('#netroom')?.value,f)},startOnline:netStartMatch,leaveOnline:netLeave,copyRoom:()=>netCopy(NET.room),copyInvite:()=>netCopy(NET.invite),shareInvite:netShareInvite,
+ createRoom:()=>{const f=netFields();netCreateRoom(f)},joinRoom:()=>{const f=netFields();netJoinRoom($('#netroom')?.value,f)},reconnectOnline:netReconnect,startOnline:netStartMatch,leaveOnline:netLeave,copyRoom:()=>netCopy(NET.room),copyInvite:()=>netCopy(NET.invite),shareInvite:netShareInvite,
  n:()=>{cfg.n=+d.v;setupTarget=Math.min(setupTarget,cfg.n-1);setupUI(true)},
  target:()=>{setupTarget=+d.v;setupUI(true)},
  choosepen:()=>{if(cfg&&cfg.pl[setupTarget])cfg.pl[setupTarget].pen=+d.v;setupUI(true)},
