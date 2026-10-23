@@ -16,7 +16,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 body{display:flex;flex-direction:column;padding:0;background:var(--bg);color:var(--tx);font:16px/1.45 var(--ff);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
-#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}#pen3d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}#c{position:relative;z-index:1}
 #c{display:block;touch-action:none;max-width:100%}
 button,select,input{font:inherit;color:var(--tx);background:var(--sf2);border:1px solid var(--ln);border-radius:10px;padding:9px 14px}
 button{cursor:pointer;transition:transform .12s,filter .12s}
@@ -188,7 +188,7 @@ body.fs #top{display:none!important}
  <button data-a="rr" aria-label="Restart round"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg></button>
  <button data-a="menu" aria-label="Main menu"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>
 </div>
-<div id="stage"><canvas id="c" aria-label="Pen Game bench"></canvas></div>
+<div id="stage"><canvas id="pen3d" aria-hidden="true"></canvas><canvas id="c" aria-label="Pen Game bench"></canvas></div>
 <div id="clk" hidden title="Shot clock"></div>
 <button id="fpz" data-a="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
 <div id="scr"></div><div id="toast" role="status"></div>
@@ -408,7 +408,7 @@ function aiPlay(id){if(!G||G.id!==id||paused||G.st!=='aim')return;const p=G.pl[G
  flick(ang,pw)}
 
 /* ---------- input ---------- */
-const cv=$('#c'),cx=cv.getContext('2d');let sc=1,cs=1,rot=false;
+const cv=$('#c'),cx=cv.getContext('2d');let sc=1,cs=1,rot=false;window.__penGameView=()=>({x:V.x,y:V.y,w:V.w,h:V.h});
 /* Portrait phones: the bench is drawn turned 90 degrees so it fills the screen. Physics is unchanged. */
 function rs(){fitWorld();const r=$('#stage').getBoundingClientRect();rot=r.height>r.width*1.05;const ww=rot?V.h:V.w,hh=rot?V.w:V.h,s=Math.min(r.width/ww,r.height/hh)||1,d=Math.min(devicePixelRatio||1,2);cv.style.width=ww*s+'px';cv.style.height=hh*s+'px';cv.width=Math.round(ww*s*d);cv.height=Math.round(hh*s*d);sc=s*d;cs=s}
 const pt=e=>{const r=cv.getBoundingClientRect(),ux=(e.clientX-r.left)/r.width,uy=(e.clientY-r.top)/r.height;return rot?{x:V.x+uy*V.w,y:V.y+V.h-ux*V.h}:{x:V.x+ux*V.w,y:V.y+uy*V.h}};
@@ -481,7 +481,7 @@ function obsSprite(o){const Qs=3,pad=8,w=(o.r?o.r*2:o.w)+pad*2,h=(o.r?o.r*2:o.h)
  return{c,w,h}}
 function draw(t,dt){cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
  const sx=shake&&!S.rm?(Math.random()-.5)*shake:0,sy=shake&&!S.rm?(Math.random()-.5)*shake:0;shake*=.88;if(shake<.3)shake=0;
- if(rot)cx.setTransform(0,sc,-sc,0,(V.y+V.h)*sc,-V.x*sc);else cx.setTransform(sc,0,0,sc,-V.x*sc,-V.y*sc);cx.translate(sx,sy);cx.drawImage(Assets.bench.img||Assets.bench.proc||fallback,0,0,W,H);if(!G)return;
+ if(rot)cx.setTransform(0,sc,-sc,0,(V.y+V.h)*sc,-V.x*sc);else cx.setTransform(sc,0,0,sc,-V.x*sc,-V.y*sc);cx.translate(sx,sy);if(!window.__pen3dActive)cx.drawImage(Assets.bench.img||Assets.bench.proc||fallback,0,0,W,H);if(!G)return;
  if(S.ink){cx.globalCompositeOperation='multiply';cx.drawImage(ink,0,0,W,H);cx.globalCompositeOperation='source-over'}
  const now=performance.now(),cur=G.pl[G.t];
  for(const o of G.obs){cx.save();cx.translate(o.x,o.y);cx.rotate(o.a);cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=8*sc;cx.shadowOffsetX=3*sc;cx.shadowOffsetY=5*sc;cx.drawImage(o.sp.c,-o.sp.w/2,-o.sp.h/2,o.sp.w,o.sp.h);cx.restore()}
@@ -968,5 +968,33 @@ if('serviceWorker' in navigator){
 }
 })();
 </script>
-
+<script type="module">
+try{
+ const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js');
+ const stage=document.querySelector('#stage'),gameCanvas=document.querySelector('#c'),canvas=document.querySelector('#pen3d');
+ const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});
+ renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xffe3c6,0x171014,2));
+ const key=new THREE.DirectionalLight(0xffd5a5,3);key.position.set(-250,-180,420);scene.add(key);
+ const fill=new THREE.DirectionalLight(0x9abfff,1);fill.position.set(280,220,250);scene.add(fill);
+ const mat=(c,r=.8)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(2400,1800),mat(0x171310));floor.position.set(480,300,-38);scene.add(floor);
+ const table=new THREE.Group();scene.add(table);
+ const top=new THREE.Mesh(new THREE.BoxGeometry(880,520,18),mat(0x80502d));top.position.set(480,300,0);table.add(top);
+ const face=new THREE.Mesh(new THREE.PlaneGeometry(872,512),mat(0x98643a));face.position.set(480,300,9.2);table.add(face);
+ const colors=[0x98643a,0x87542f,0x9b673b,0x88552f];
+ for(let i=0;i<4;i++){const plank=new THREE.Mesh(new THREE.PlaneGeometry(868,126),mat(colors[i]));plank.position.set(480,300-192+i*128,9.4);table.add(plank);
+  for(let j=0;j<12;j++){const grain=new THREE.Mesh(new THREE.BoxGeometry(18+(j%4)*13,.65,.2),new THREE.MeshBasicMaterial({color:j%2?0x59351f:0xc28a53,transparent:true,opacity:.3}));grain.position.set(70+j*70+(i%2)*13,300-192+i*128+(j%3-1)*23,9.6);table.add(grain)}}
+ const edge=mat(0x392319);for(const y of [40,560]){const rail=new THREE.Mesh(new THREE.BoxGeometry(880,8,18),edge);rail.position.set(480,y,0);table.add(rail)}
+ const legmat=mat(0x57351f);for(const x of [85,875])for(const y of [48,552]){const leg=new THREE.Mesh(new THREE.BoxGeometry(30,30,68),legmat);leg.position.set(x,y,-43);table.add(leg)}
+ const metal=mat(0x9299a3,.28);for(let i=0;i<12;i++){for(const y of [44,556]){const screw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,1,16),metal);screw.rotation.x=Math.PI/2;screw.position.set(60+i*76,y,10);table.add(screw)}}
+ const camera=new THREE.OrthographicCamera(0,960,0,600,.1,3000);camera.position.set(480,300,1100);camera.lookAt(480,300,0);
+ function resize(){const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);
+  const portrait=r.height>r.width*1.05;window.__pen3dActive=!portrait;canvas.style.display=portrait?'none':'block';
+  if(!portrait){const cr=gameCanvas.getBoundingClientRect();canvas.style.inset='auto';canvas.style.left=(cr.left-r.left)+'px';canvas.style.top=(cr.top-r.top)+'px';canvas.style.width=cr.width+'px';canvas.style.height=cr.height+'px';
+   const v=window.__penGameView?.()||{x:0,y:0,w:960,h:600};camera.left=v.x;camera.right=v.x+v.w;camera.top=v.y;camera.bottom=v.y+v.h;camera.updateProjectionMatrix()}}
+ window.addEventListener('resize',resize);new ResizeObserver(resize).observe(stage);
+ function animate(){requestAnimationFrame(animate);resize();renderer.render(scene,camera)}animate();
+}catch(e){console.warn('3D environment unavailable; using procedural fallback.',e);window.__pen3dActive=false}
+</script>
 </body></html>
