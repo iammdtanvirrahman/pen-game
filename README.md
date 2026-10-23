@@ -45,6 +45,7 @@ GitHub Actions runs this suite for pushes and pull requests targeting the `5.0` 
 ## Known limitations
 
 - Online rooms depend on the public PeerJS signalling service and available WebRTC connectivity. A custom TURN relay, managed signalling backend, durable rooms, accounts, friends, matchmaking, rankings and tournaments are not included.
+- The desktop presentation uses a procedural Three.js desk with wood grain, a thick tabletop, front/side lips, underside supports, sturdy legs and hardware. Matter.js remains the gameplay authority; the existing touch/aim controls are retained.
 - The host is authoritative for ordinary gameplay, but this is still a peer-to-peer game, not a cheat-proof server-authoritative service.
 - A reconnect does not restore a disconnected match's physics state; the host can invite the guest back and start a new match.
 - Offline mode applies to the cached local app and local gameplay. Online rooms, sharing and signalling still require internet.
